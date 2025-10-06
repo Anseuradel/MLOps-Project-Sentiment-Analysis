@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: ml-service-config
 data:
-  MODEL_PATH: "src/model/models/model.joblib"
+  MODEL_REPO: "Adelanseur/MLOps-Project"   # Hugging Face repo
+  MODEL_FILE: "best_model.pth"             # file in the repo
+  MODEL_NAME: "prajjwal1/bert-tiny"        # base HF transformer name
+  NUM_CLASSES: "5"                         # adjust for your dataset
+  # MODEL_PATH: "src/model/models/model.joblib"
   LOG_LEVEL: "INFO"
   MAX_WORKERS: "4"
