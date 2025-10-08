@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  fastapi_app:
+    build: .
+    container_name: sentiment_classifier_app
+    ports:
+      - "8000:8000"
+    environment:
+      - ENTRYPOINT_MODE=api
+    volumes:
+      - ./Dataset:/app/Dataset
+      
