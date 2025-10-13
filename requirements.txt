@@ -6,6 +6,7 @@ pandas==2.1.4          # Modern version with better performance
 scikit-learn==1.3.2     # Current stable (with many optimizations)
 nltk==3.8.1            # Updated NLP toolkit
 matplotlib
+seaborn
 
 # FastAPI Stack
 fastapi==0.109.1        # Modern FastAPI version
