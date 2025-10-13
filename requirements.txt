@@ -1,3 +1,5 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 # Core ML/NLP
 numpy==1.26.4          # Current stable (faster, better memory management)
 pandas==2.1.4          # Modern version with better performance
@@ -22,7 +24,7 @@ typing-extensions==4.9.0  # Better type hints support
 anyio==4.2.0           # Improved async compatibility
 
 # Deep learning and Hugging Face support
-torch==2.2.2+cpu --extra-index-url https://download.pytorch.org/whl/cpu         # For deep learning model operations
+torch==2.2.2+cpu     # For deep learning model operations
 transformers         # For Hugging Face model and tokenizer support
 huggingface_hub      # For downloading models from Hugging Face Hub
 openpyxl             # For reading Excel files with pandas
