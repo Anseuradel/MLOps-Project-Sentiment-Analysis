@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from src import config
+import config
 
 from transformers import BertModel
 
