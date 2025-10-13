@@ -1,13 +1,18 @@
-# version: "3.8"
+# version: "3.9"
 services:
-  fastapi_app:
-    build:
-      context: .
-      dockerfile: Dockerfile   
-    container_name: sentiment_classifier_app
+  ml-service:
+    build: .
+    container_name: fastapi-ml-service
     ports:
       - "8000:8000"
     environment:
-      - ENTRYPOINT_MODE=api
-    volumes:
-      - ./Dataset:/app/Dataset  
+      # switch between real and mock models
+      USE_MOCK: "true"             # change to "false" to use real model
+      MODEL_NAME: "prajjwal1/bert-tiny"
+      MODEL_REPO: "Adelanseur/MLOps-Project"
+      MODEL_FILE: "best_model.pth"
+      MODEL_PATH: "outputs/best_model.pth"
+      NUM_CLASSES: "5"
+      HF_TOKEN: ""                 # optional (if your repo is private)
+      LOG_LEVEL: "INFO"
+    # command: uvicorn src.api.api:app --host 0.0.0.0 --port 8000 --reload
