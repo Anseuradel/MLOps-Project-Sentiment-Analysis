@@ -15,7 +15,7 @@ services:
       NUM_CLASSES: "5"
       HF_TOKEN: ""                 # optional (if your repo is private)
       LOG_LEVEL: "INFO"
-    # command: uvicorn src.api.api:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn src.api.api:app --host 0.0.0.0 --port 8000 --reload
 
     streamlit_app:
       build: .
