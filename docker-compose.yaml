@@ -23,6 +23,7 @@ services:
     command: streamlit run src/app/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
     ports:
       - "8051:8051"
-    depends_on: ml-service-fastapi
+    depends_on: 
+      - ml-service-fastapi
 
     
