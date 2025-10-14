@@ -5,8 +5,9 @@ numpy==1.26.4          # Current stable (faster, better memory management)
 pandas==2.1.4          # Modern version with better performance
 scikit-learn==1.3.2     # Current stable (with many optimizations)
 nltk==3.8.1            # Updated NLP toolkit
-matplotlib
-seaborn
+matplotlib              # Add matplotlib for plots
+seaborn                 # Add seaborn for plots
+streamlit               # Add streamlit for visualization
 
 # FastAPI Stack
 fastapi==0.109.1        # Modern FastAPI version
