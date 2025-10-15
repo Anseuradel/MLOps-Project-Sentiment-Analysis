@@ -31,54 +31,86 @@ st.sidebar.write("Switch to real model by setting USE_MOCK=false in docker-compo
 st.markdown("### ✍️ Enter your text:")
 user_input = st.text_area("Text to analyze", height=150)
 
-# Predictions
-if st.button("🔍 Predict Sentiment"):
-    if user_input.strip() == "":
-        st.warning("Please enter some text before predicting.")
-    else:
-        with st.spinner("Analyzing..."):
-            response = requests.post(API_URL, json={"text": user_input})
+# -----------------------------
+# Helper functions
+# -----------------------------
+def get_latest_output_folder(base_path="outputs/training_evaluation/training"):
+    """Return the most recent folder inside outputs/"""
+    folders = [f.path for f in os.scandir(base_path) if f.is_dir()]
+    if not folders:
+        return None
+    latest_folder = max(folders, key=os.path.getmtime)
+    return latest_folder
 
-        if response.status_code == 200:
-            result = response.json()
+def load_metrics(output_folder):
+    """Load evaluation metrics from evaluation.json if exists"""
+    metrics_file = os.path.join(output_folder, "evaluation.json")
+    if os.path.exists(metrics_file):
+        with open(metrics_file) as f:
+            return json.load(f)
+    return None
 
-            # --- Show prediction ---
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                st.success(f"**Prediction:** {result['prediction_label'].capitalize()}")
-                st.write(f"**Confidence:** {result['confidence']:.2f}")
-                st.caption(f"Model version: {result['model_version']} | Type: {result['model_type']}")
+def load_plot(output_folder, plot_name="accuracy_plot.png"):
+    """Load a plot image"""
+    plot_path = os.path.join(output_folder, plot_name)
+    if os.path.exists(plot_path):
+        return Image.open(plot_path)
+    return None
 
-            # --- Plot probability distribution ---
-            with col2:
-                probs = pd.DataFrame(
-                    result["probabilities"].items(),
-                    columns=["Label", "Probability"]
-                )
-                fig = px.bar(
-                    probs,
-                    x="Label",
-                    y="Probability",
-                    title="Prediction Probabilities",
-                    range_y=[0, 1],
-                    text_auto=".2f"
-                )
-                st.plotly_chart(fig, use_container_width=True)
+# -----------------------------
+# Tabs for UI
+# -----------------------------
+tab1, tab2 = st.tabs(["Prediction", "Model Info"])
 
-            # --- Step 2: Update session history ---
-            if "history" not in st.session_state:
-                st.session_state["history"] = []
+# -----------------------------
+# Prediction Tab
+# -----------------------------
+with tab1:
+    st.header("🧠 Sentiment Prediction")
+    user_input = st.text_area("Enter your text:")
+    if st.button("Predict"):
+        try:
+            response = requests.post(
+                "http://ml-service-fastapi:8000/predict",
+                json={"text": user_input},
+                timeout=5
+            )
+            if response.status_code == 200:
+                result = response.json()
+                st.success(f"Prediction: {result['prediction_label']}")
+                st.write(f"Confidence: {result.get('confidence', 0):.2f}")
+            else:
+                st.error(f"Error calling prediction API: {response.text}")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Connection error: {e}")
 
-            st.session_state["history"].append({
-                "text": user_input,
-                "label": result["prediction_label"],
-                "confidence": result["confidence"]
-            })
-
+# -----------------------------
+# Model Info Tab
+# -----------------------------
+with tab2:
+    st.header("📊 Model Evaluation & Metrics")
+    latest_folder = get_latest_output_folder("outputs")
+    
+    if latest_folder:
+        st.subheader(f"Latest Outputs Folder: {latest_folder}")
+        
+        # Load metrics
+        metrics = load_metrics(latest_folder)
+        if metrics:
+            st.write("### Evaluation Metrics")
+            st.json(metrics)
         else:
-            st.error("Error calling prediction API.")
-
-# --- Display history ---
-if "history" in st.session_state and st.session_state["history"]:
-    st.markdown("### 🕓 Prediction History")
-    st.dataframe(pd.DataFrame(st.session_state["history"]))
+            st.warning("No evaluation.json found in latest folder.")
+        
+        # Load accuracy plot
+        plot = load_plot(latest_folder, "accuracy_plot.png")
+        if plot:
+            st.image(plot, caption="Accuracy Plot", use_column_width=True)
+        else:
+            st.warning("No accuracy_plot.png found in latest folder.")
+        
+        # Optional: display timestamp of last update
+        timestamp = datetime.fromtimestamp(os.path.getmtime(latest_folder))
+        st.caption(f"Last updated: {timestamp}")
+    else:
+        st.warning("No outputs folder found.")
