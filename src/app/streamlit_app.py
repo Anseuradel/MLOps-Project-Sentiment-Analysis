@@ -5,6 +5,18 @@ import plotly.express as px
 
 st.set_page_config(page_title="Sentiment Analysis", page_icon="🧠", layout="wide")
 
+st.markdown("""
+<style>
+    .stButton>button {
+        background-color: #4CAF50;
+        color: white;
+        border-radius: 10px;
+        padding: 0.5em 1em;
+        font-weight: bold;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🧠 Sentiment Analysis Dashboard")
 st.write("Analyze text sentiment using a deployed FastAPI ML model.")
 
