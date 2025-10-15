@@ -11,7 +11,8 @@ user_input = st.text_area("Enter your text:")
 
 if st.button("Predict"):
     response = requests.post(
-        "http://localhost:8000/predict",  # Internal FastAPI endpoint
+        # "http://localhost:8000/predict",  # Internal FastAPI endpoint
+        "http://ml-service-fastapi:8000/predict"
         json={"text": user_input}
     )
     if response.status_code == 200:
