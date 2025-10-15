@@ -55,3 +55,17 @@ if st.button("🔍 Predict Sentiment"):
 
         else:
             st.error("Error calling prediction API.")
+
+if "history" not in st.session_state:
+    st.session_state["history"] = []
+
+# After each successful prediction
+st.session_state["history"].append({
+    "text": user_input,
+    "label": result["prediction_label"],
+    "confidence": result["confidence"]
+})
+
+if st.session_state["history"]:
+    st.markdown("### 🕓 Prediction History")
+    st.dataframe(pd.DataFrame(st.session_state["history"]))
