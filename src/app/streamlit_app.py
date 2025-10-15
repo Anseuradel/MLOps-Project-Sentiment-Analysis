@@ -2,6 +2,10 @@ import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
+import os
+import json
+from PIL import Image
+from datetime import datetime
 
 st.set_page_config(page_title="Sentiment Analysis", page_icon="🧠", layout="wide")
 
@@ -27,15 +31,13 @@ st.sidebar.header("⚙️ Model Settings")
 use_mock = st.sidebar.checkbox("Use Mock Model", value=True)
 st.sidebar.write("Switch to real model by setting USE_MOCK=false in docker-compose.")
 
-# Input
-st.markdown("### ✍️ Enter your text:")
-user_input = st.text_area("Text to analyze", height=150)
-
 # -----------------------------
 # Helper functions
 # -----------------------------
 def get_latest_output_folder(base_path="outputs/training_evaluation/training"):
     """Return the most recent folder inside outputs/"""
+    if not os.path.exists(base_path):
+        return None
     folders = [f.path for f in os.scandir(base_path) if f.is_dir()]
     if not folders:
         return None
@@ -67,11 +69,11 @@ tab1, tab2 = st.tabs(["Prediction", "Model Info"])
 # -----------------------------
 with tab1:
     st.header("🧠 Sentiment Prediction")
-    user_input = st.text_area("Enter your text:")
+    user_input = st.text_area("Enter your text:", height=150)
     if st.button("Predict"):
         try:
             response = requests.post(
-                "http://ml-service-fastapi:8000/predict",
+                API_URL,
                 json={"text": user_input},
                 timeout=5
             )
@@ -109,7 +111,7 @@ with tab2:
         else:
             st.warning("No accuracy_plot.png found in latest folder.")
         
-        # Optional: display timestamp of last update
+        # Display timestamp of last update
         timestamp = datetime.fromtimestamp(os.path.getmtime(latest_folder))
         st.caption(f"Last updated: {timestamp}")
     else:
