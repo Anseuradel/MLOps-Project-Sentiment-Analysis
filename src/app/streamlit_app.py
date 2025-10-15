@@ -34,13 +34,15 @@ st.sidebar.write("Switch to real model by setting USE_MOCK=false in docker-compo
 # -----------------------------
 # Helper functions
 # -----------------------------
-def get_latest_output_folder(base_path="outputs/training_evaluation/training"):
-    """Return the most recent folder inside outputs/"""
+def get_latest_output_folder(base_path="outputs/training_evaluation/evaluation"):
+    """Return the most recent folder inside outputs/training_evaluation/evaluation"""
     if not os.path.exists(base_path):
         return None
+    # List all subfolders
     folders = [f.path for f in os.scandir(base_path) if f.is_dir()]
     if not folders:
         return None
+    # Return the one with the latest modification time
     latest_folder = max(folders, key=os.path.getmtime)
     return latest_folder
 
