@@ -19,7 +19,7 @@ st.sidebar.write("Switch to real model by setting USE_MOCK=false in docker-compo
 st.markdown("### ✍️ Enter your text:")
 user_input = st.text_area("Text to analyze", height=150)
 
-# Prediction
+# Predictions
 if st.button("🔍 Predict Sentiment"):
     if user_input.strip() == "":
         st.warning("Please enter some text before predicting.")
@@ -30,14 +30,14 @@ if st.button("🔍 Predict Sentiment"):
         if response.status_code == 200:
             result = response.json()
 
-            # Show main prediction
+            # --- Show prediction ---
             col1, col2 = st.columns([2, 1])
             with col1:
                 st.success(f"**Prediction:** {result['prediction_label'].capitalize()}")
                 st.write(f"**Confidence:** {result['confidence']:.2f}")
                 st.caption(f"Model version: {result['model_version']} | Type: {result['model_type']}")
 
-            # Plot probability distribution
+            # --- Plot probability distribution ---
             with col2:
                 probs = pd.DataFrame(
                     result["probabilities"].items(),
@@ -53,19 +53,20 @@ if st.button("🔍 Predict Sentiment"):
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
+            # --- Step 2: Update session history ---
+            if "history" not in st.session_state:
+                st.session_state["history"] = []
+
+            st.session_state["history"].append({
+                "text": user_input,
+                "label": result["prediction_label"],
+                "confidence": result["confidence"]
+            })
+
         else:
             st.error("Error calling prediction API.")
 
-if "history" not in st.session_state:
-    st.session_state["history"] = []
-
-# After each successful prediction
-st.session_state["history"].append({
-    "text": user_input,
-    "label": result["prediction_label"],
-    "confidence": result["confidence"]
-})
-
-if st.session_state["history"]:
+# --- Display history ---
+if "history" in st.session_state and st.session_state["history"]:
     st.markdown("### 🕓 Prediction History")
     st.dataframe(pd.DataFrame(st.session_state["history"]))
