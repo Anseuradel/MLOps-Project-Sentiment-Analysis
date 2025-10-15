@@ -8,6 +8,7 @@ nltk==3.8.1            # Updated NLP toolkit
 matplotlib              # Add matplotlib for plots
 seaborn                 # Add seaborn for plots
 streamlit               # Add streamlit for visualization
+plotly                  # Add plotly vor visualization
 
 # FastAPI Stack
 fastapi==0.109.1        # Modern FastAPI version
