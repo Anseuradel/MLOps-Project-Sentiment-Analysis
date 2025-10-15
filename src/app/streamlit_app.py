@@ -93,27 +93,36 @@ with tab1:
 # -----------------------------
 with tab2:
     st.header("📊 Model Evaluation & Metrics")
-    latest_folder = get_latest_output_folder("outputs")
+    latest_folder = get_latest_output_folder("outputs/training_evaluation/evaluation")
     
     if latest_folder:
         st.subheader(f"Latest Outputs Folder: {latest_folder}")
         
-        # Load metrics
-        metrics = load_metrics(latest_folder)
-        if metrics:
-            st.write("### Evaluation Metrics")
-            st.json(metrics)
+        # Load metrics.txt
+        metrics_file = os.path.join(latest_folder, "metrics.txt")
+        if os.path.exists(metrics_file):
+            with open(metrics_file) as f:
+                metrics_content = f.read()
+            st.text_area("Metrics.txt", metrics_content, height=200)
         else:
-            st.warning("No evaluation.json found in latest folder.")
+            st.warning("No metrics.txt found in latest folder.")
         
-        # Load accuracy plot
-        plot = load_plot(latest_folder, "accuracy_plot.png")
-        if plot:
-            st.image(plot, caption="Accuracy Plot", use_column_width=True)
-        else:
-            st.warning("No accuracy_plot.png found in latest folder.")
+        # Load and display PNG plots
+        plot_files = [
+            "classification_report.png",
+            "confusion_matrix.png",
+            "confidence_histogram.png"
+        ]
         
-        # Display timestamp of last update
+        for plot_name in plot_files:
+            plot_path = os.path.join(latest_folder, plot_name)
+            if os.path.exists(plot_path):
+                img = Image.open(plot_path)
+                st.image(img, caption=plot_name.replace("_", " ").replace(".png", ""), use_column_width=True)
+            else:
+                st.warning(f"{plot_name} not found in latest folder.")
+        
+        # Optional: display timestamp of last update
         timestamp = datetime.fromtimestamp(os.path.getmtime(latest_folder))
         st.caption(f"Last updated: {timestamp}")
     else:
