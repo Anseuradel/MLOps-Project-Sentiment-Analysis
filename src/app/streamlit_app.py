@@ -116,7 +116,7 @@ with tab2:
             plot_path = os.path.join(latest_folder, plot_name)
             if os.path.exists(plot_path):
                 img = Image.open(plot_path)
-                st.image(img, caption=plot_name.replace("_", " ").replace(".png", ""), use_column_width=True)
+                st.image(img, caption=plot_name.replace("_", " ").replace(".png", ""), use_container_width=True)
             else:
                 st.warning(f"{plot_name} not found in latest folder.")
         
