@@ -56,25 +56,24 @@ class SentimentClassifier(nn.Module):
 
 
 
-import torch
-import torch.nn as nn
-import random
+import numpy as np
 
-class MockSentimentClassifier(nn.Module):
-    """
-    Mock model for infrastructure testing.
-    No Hugging Face model download required.
-    """
+class MockSentimentClassifier:
     def __init__(self, n_classes=5):
-        super().__init__()
         self.n_classes = n_classes
-
-    def forward(self, input_ids, attention_mask=None):
-        batch_size = input_ids.size(0)
-        # Return random logits
-        return torch.randn(batch_size, self.n_classes)
+        self.labels = ["very negative", "negative", "neutral", "positive", "very positive"]
 
     def predict(self, texts):
-        # Fake predictions for API testing
-        preds = [random.randint(0, self.n_classes - 1) for _ in texts]
-        return preds
+        """Return a random class index for each text."""
+        return [np.random.randint(0, self.n_classes) for _ in texts]
+
+    def predict_proba(self, texts):
+        """Return random but valid probability distributions."""
+        probs = np.random.rand(len(texts), self.n_classes)
+        probs = probs / probs.sum(axis=1, keepdims=True)
+        return probs
+
+    def get_label(self, index):
+        """Return label string for an index."""
+        return self.labels[index]
+
