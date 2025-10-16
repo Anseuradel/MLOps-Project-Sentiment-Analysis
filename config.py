@@ -54,3 +54,7 @@ MODEL_EVALUATION_OUTPUT_DIR = "outputs/training_evaluation/evaluation"
 TEST_DATA_DIR = "dataset/test_datasets"  # folder containing test data files
 os.makedirs(TEST_DATA_DIR, exist_ok=True)
 
+# -------------------------------------------------------------------------
+# Sqlite database path
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "data", "predictions.db")
+
