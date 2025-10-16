@@ -7,6 +7,8 @@ import json
 from PIL import Image
 from datetime import datetime
 
+from src/api import database  
+
 st.set_page_config(page_title="Sentiment Analysis", page_icon="🧠", layout="wide")
 
 st.markdown("""
@@ -62,7 +64,7 @@ def load_plot(output_folder, plot_name="accuracy_plot.png"):
 # -----------------------------
 # Tabs for UI
 # -----------------------------
-tab1, tab2 = st.tabs(["Prediction", "Model Info"])
+tab1, tab2, tab3 = st.tabs(["Prediction", "Model Info", "Prediction Logs"])
 
 # -----------------------------
 # Prediction Tab
@@ -125,3 +127,20 @@ with tab2:
         st.caption(f"Last updated: {timestamp}")
     else:
         st.warning("No outputs folder found.")
+
+# -----------------------------
+# Prediction Logs Tab
+# -----------------------------
+with tab3:
+    st.header("🗃️ Recent Prediction Logs")
+    rows = database.fetch_recent_predictions(limit=20)
+    if not rows:
+        st.warning("No predictions logged yet.")
+    else:
+        # Convert to DataFrame for nicer display
+        df = pd.DataFrame(rows, columns=[
+            "timestamp", "input_text", "predicted_label", 
+            "confidence", "model_version", "model_type", "latency_ms"
+        ])
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        st.dataframe(df, use_container_width=True)
