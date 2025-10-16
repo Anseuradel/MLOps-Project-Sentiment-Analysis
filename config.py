@@ -56,5 +56,5 @@ os.makedirs(TEST_DATA_DIR, exist_ok=True)
 
 # -------------------------------------------------------------------------
 # Sqlite database path
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "data", "predictions.db")
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "db", "predictions.db")
 
