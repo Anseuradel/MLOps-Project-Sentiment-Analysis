@@ -32,6 +32,3 @@ torch==2.2.2+cpu     # For deep learning model operations
 transformers         # For Hugging Face model and tokenizer support
 huggingface_hub      # For downloading models from Hugging Face Hub
 openpyxl             # For reading Excel files with pandas
-
-# Database : 
-sqlite3
