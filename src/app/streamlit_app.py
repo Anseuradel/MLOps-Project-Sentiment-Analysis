@@ -7,7 +7,7 @@ import json
 from PIL import Image
 from datetime import datetime
 
-from src/api import database  
+from src.api import database  
 
 st.set_page_config(page_title="Sentiment Analysis", page_icon="🧠", layout="wide")
 

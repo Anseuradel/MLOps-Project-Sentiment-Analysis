@@ -9,6 +9,7 @@ matplotlib              # Add matplotlib for plots
 seaborn                 # Add seaborn for plots
 streamlit               # Add streamlit for visualization
 plotly                  # Add plotly vor visualization
+datetime
 
 # FastAPI Stack
 fastapi==0.109.1        # Modern FastAPI version
@@ -31,3 +32,6 @@ torch==2.2.2+cpu     # For deep learning model operations
 transformers         # For Hugging Face model and tokenizer support
 huggingface_hub      # For downloading models from Hugging Face Hub
 openpyxl             # For reading Excel files with pandas
+
+# Database : 
+sqlite3
