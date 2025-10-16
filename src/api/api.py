@@ -19,6 +19,10 @@ from huggingface_hub import hf_hub_download, HfFolder
 
 # local models
 from src.model.model import SentimentClassifier, MockSentimentClassifier
+# Load db function
+from src.api.database import insert_prediction
+
+
 
 # ------------------------------------------------------------------------------
 # Configuration from env / defaults
@@ -195,6 +199,19 @@ async def predict(request: PredictionRequest):
             timestamp=datetime.utcnow(),
             status="success"
         )
+        # Log prediction to SQLite
+        try:
+            insert_prediction(
+                input_text=request.text,
+                predicted_label=label,
+                confidence=float(np.max(probs)),
+                model_version=resp.model_version,
+                model_type=resp.model_type,
+                latency_ms=resp.processing_time_ms
+            )
+        except Exception as db_err:
+            logger.warning(f"Failed to log prediction to DB: {db_err}")
+            
         return resp
 
     except Exception as e:
