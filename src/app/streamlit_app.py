@@ -2,12 +2,15 @@ import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
-import os
+import os, sys
 import json
 from PIL import Image
 from datetime import datetime
 
-from src.api import database  
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from api import database
+  
 
 st.set_page_config(page_title="Sentiment Analysis", page_icon="🧠", layout="wide")
 
