@@ -56,5 +56,13 @@ os.makedirs(TEST_DATA_DIR, exist_ok=True)
 
 # -------------------------------------------------------------------------
 # Sqlite database path
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", "db", "predictions.db")
 
+# Get the absolute path to the project root (one level above src/)
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+# Define DB folder and file
+DB_DIR = os.path.join(BASE_DIR, "db")
+DB_PATH = os.path.join(DB_DIR, "predictions.db")
+
+# (optional) Ensure the folder exists
+os.makedirs(DB_DIR, exist_ok=True)
