@@ -2,12 +2,15 @@ import sqlite3
 from datetime import datetime
 import os
 from config import DB_PATH
+from config import DB_DIR
 import logging
 
 logger = logging.getLogger(__name__)
 
 # Ensure the data folder exists
-os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+# os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+# Ensure the db folder exists (important when using Docker volume)
+os.makedirs(DB_DIR, exist_ok=True)
 
 def init_db():
     """Initialize database and create tables if not exists."""
