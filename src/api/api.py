@@ -20,7 +20,7 @@ from huggingface_hub import hf_hub_download, HfFolder
 # local models
 from src.model.model import SentimentClassifier, MockSentimentClassifier
 # Load db function
-from src.api.database import insert_prediction
+from src.api import database
 
 
 
@@ -201,7 +201,7 @@ async def predict(request: PredictionRequest):
         )
         # Log prediction to SQLite
         try:
-            insert_prediction(
+            database.insert_prediction(
                 input_text=request.text,
                 predicted_label=label,
                 confidence=float(np.max(probs)),
