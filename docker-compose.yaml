@@ -17,7 +17,7 @@ services:
       LOG_LEVEL: "INFO"
     command: uvicorn src.api.api:app --host 0.0.0.0 --port 8000 --reload
     volumes:
-      - ./db:/app/db # Mounts host db folder into container
+      - ./db:/app/db:rw # Mounts host db folder into container
 
   streamlit_app:
     build: .
@@ -29,6 +29,6 @@ services:
       - ml-service-fastapi
     volumes:
       - ./outputs:/app/outputs
-      - ./db:/app/db
+      - ./db:/app/db:rw
 
     
