@@ -2,28 +2,36 @@ import sqlite3
 from datetime import datetime
 import os
 from config import DB_PATH
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Ensure the data folder exists
 os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 def init_db():
     """Initialize database and create tables if not exists."""
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS predictions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp TEXT,
-            input_text TEXT,
-            predicted_label TEXT,
-            confidence REAL,
-            model_version TEXT,
-            model_type TEXT,
-            latency_ms REAL
-        )
-    """)
-    conn.commit()
-    conn.close()
+    try:
+        logger.info(f"Initializing database at {DB_PATH}")
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS predictions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT,
+                input_text TEXT,
+                predicted_label TEXT,
+                confidence REAL,
+                model_version TEXT,
+                model_type TEXT,
+                latency_ms REAL
+            )
+        """)
+        conn.commit()
+        conn.close()
+        logger.info("Database initialized successfully ✅")
+    except Exception as e:
+        logger.error(f"Failed to initialize DB: {e}")
 
 def insert_prediction(input_text, predicted_label, confidence, model_version, model_type, latency_ms):
     """Insert a new prediction record."""
