@@ -57,12 +57,9 @@ os.makedirs(TEST_DATA_DIR, exist_ok=True)
 # -------------------------------------------------------------------------
 # Sqlite database path
 
-# Get the absolute path to the project root (one level above src/)
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-
-# Define DB folder and file
-DB_DIR = os.path.join(BASE_DIR, "db")
+# Path inside container (matches your docker-compose volume)
+DB_DIR = "/app/db"
 DB_PATH = os.path.join(DB_DIR, "predictions.db")
 
-# (optional) Ensure the folder exists
+# Ensure folder exists inside container
 os.makedirs(DB_DIR, exist_ok=True)
