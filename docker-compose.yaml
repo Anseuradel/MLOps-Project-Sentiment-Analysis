@@ -29,5 +29,6 @@ services:
       - ml-service-fastapi
     volumes:
       - ./outputs:/app/outputs
+      - ./db:/app/db
 
     
