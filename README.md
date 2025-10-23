@@ -1,7 +1,5 @@
 # MLOps Project -- End-to-End Sentiment Analysis Pipeline
 
---------------------------------------------
-
 ## Project Overview
 This project demonstrates a complete MLOps workflow for a semtiment analysis model, covering every step from data ingestion to deployment and monitoring.
 It uses a modular design to ensure scalability, reproducibility, and observability of machine learning system in production.
@@ -14,7 +12,13 @@ The system includes :
 - Docker Compose orchestration for local deployment
 - Prometheus & Grafana for metrics and monitoring
 
+---
+
 ## Architecture Overview : 
+
+![Workflow Diagram](assets/images/workflow-diagram.svg)
+
+## Repository Structure : 
 
 ```Python
 Dataset/
@@ -67,6 +71,7 @@ LICENSE
 README.md
 requirements.txt
 ```
+---
 
 how to start project :
 1) launch docker desktop
