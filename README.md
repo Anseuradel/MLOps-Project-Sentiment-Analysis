@@ -16,7 +16,9 @@ The system includes :
 
 ## Architecture Overview : 
 
-![Workflow Diagram]("assets/images/molps project workflow v2.svg")
+![Workflow Diagram](assets/images/molps-project-workflow-v2.svg)
+
+*Diagram created with [Excalidraw](https://excalidraw.com/)*
 
 ## Repository Structure : 
 
