@@ -1,2 +1,8 @@
 *.pth
 !outputs/best_model.pth
+
+# Ignore compiled Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
