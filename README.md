@@ -16,7 +16,7 @@ The system includes :
 
 ## Architecture Overview : 
 
-![Workflow Diagram](assets/images/workflow-diagram.svg)
+![Workflow Diagram]("assets/images/molps project workflow v2.svg")
 
 ## Repository Structure : 
 
