@@ -16,6 +16,7 @@ The system includes :
 
 ## Architecture Overview : 
 
+```Python
 Sentiment-Analysis-project/
 ├── Dataset/
 	└── text.csv                    # Dataset containing reviews from top 10 most popular play store apps
@@ -52,6 +53,7 @@ Sentiment-Analysis-project/
 ├── config.py                               # Configuration settings (paths, model parameters, etc.)
 ├── README.md                               # Project documentation (this file)
 └── requirements.txt                        # Dependencies required to run the project
+```
 
 how to start project :
 1) launch docker desktop
