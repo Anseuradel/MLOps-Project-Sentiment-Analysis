@@ -17,42 +17,55 @@ The system includes :
 ## Architecture Overview : 
 
 ```Python
-Sentiment-Analysis-project/
-├── Dataset/
-	└── text.csv                    # Dataset containing reviews from top 10 most popular play store apps
-├── k8s/                    
-│   ├── configmap.yaml                      
-│   │── deployment.yaml 
-│   │── grafana.yaml
-│   │── hpa.yaml
-│   │── persistence.yaml
-│   │── prometheus.yaml
-│   └── service.yaml
-├── output/
-│   ├── training_evaluation/                      # Evaluation outputs and plots
-│	│   ├── evaluation/
-│	│   └── training/
-├── src/
-│   ├── api/ 
-│	│   ├── main.py
-│   ├── model/
-│	│   ├── data_extraction.py              # Loads raw data from files 
-│	│   ├── data_processing.py              # Cleans and tokenizes text data, splits dataset
-│	│   ├── evaluate.py                     # Contains evaluation and plotting functions
-│	│   ├── dataloader.py                   # Constructs PyTorch DataLoaders
-│	│   ├── model.py                        # Defines the SentimentClassifier model architecture
-│	│   ├── trainer.py                      # Contains training routines and plotting functions
-│   └── inference.py                        # Provides sentiment prediction for new inputs
-├── tests/
-│   ├── evaluation/
-│   │   └── evaluate_model.py               # Function used by github workflow for model evaluation.
-├── .gitattributes                            
-├── Dockerfile
-├── LICENSE
-├── launch_k8s.ps1
-├── config.py                               # Configuration settings (paths, model parameters, etc.)
-├── README.md                               # Project documentation (this file)
-└── requirements.txt                        # Dependencies required to run the project
+Dataset/
+    └── text.txt
+outputs/
+    └── training_evaluation/
+        ├── evaluation/
+            └── run_28-09-2025-16-16-25/
+                ├── classification_report.png
+                ├── confidence_histogram.png
+                ├── confusion_matrix.png
+                └── metrics.txt
+        └── training/
+            └── run_28-09-2025-14-16-46/
+                ├── accuracy_and_loss_plot.png
+                └── training_history.json
+src/
+    ├── api/
+        ├── api.py
+        ├── database.py
+        └── main.py
+    ├── app/
+        └── streamlit_app.py
+    ├── model/
+        ├── __init__.py
+        ├── data_extraction.py
+        ├── data_processing.py
+        ├── dataloader.py
+        ├── evaluate.py
+        ├── inference.py
+        ├── main_loading_by_chunks.py
+        ├── main2.py
+        ├── model.py
+        ├── run_main_colab_git_lfs.py
+        ├── run_main_colab_hugg.py
+        └── trainer.py
+    └── __init__.py
+tests/
+    ├── load_test.ps1
+    ├── test_api.py
+    └── test_model.py
+.gitattributes
+.gitignore
+config.py
+docker-compose.yaml
+Dockerfile
+last_chunk.txt
+launch_k8s.ps1
+LICENSE
+README.md
+requirements.txt
 ```
 
 how to start project :
