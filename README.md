@@ -1,4 +1,57 @@
-# MLOps-Project
+# MLOps Project -- End-to-End Sentiment Analysis Pipeline
+
+--------------------------------------------
+
+## Project Overview
+This project demonstrates a complete MLOps workflow for a semtiment analysis model, covering every step from data ingestion to deployment and monitoring.
+It uses a modular design to ensure scalability, reproducibility, and observability of machine learning system in production.
+
+The system includes : 
+- Model Training & Evaluzation using Putorch
+- FastAPI backend for model serving
+- Streamlit dashboard for visualization and predictions
+- SQLite databse for prediction logging
+- Docker Compose orchestration for local deployment
+- Prometheus & Grafana for metrics and monitoring
+
+## Architecture Overview : 
+
+Sentiment-Analysis-project/
+├── Dataset/
+	└── text.csv                    # Dataset containing reviews from top 10 most popular play store apps
+├── k8s/                    
+│   ├── configmap.yaml                      
+│   │── deployment.yaml 
+│   │── grafana.yaml
+│   │── hpa.yaml
+│   │── persistence.yaml
+│   │── prometheus.yaml
+│   └── service.yaml
+├── output/
+│   ├── training_evaluation/                      # Evaluation outputs and plots
+│	│   ├── evaluation/
+│	│   └── training/
+├── src/
+│   ├── api/ 
+│	│   ├── main.py
+│   ├── model/
+│	│   ├── data_extraction.py              # Loads raw data from files 
+│	│   ├── data_processing.py              # Cleans and tokenizes text data, splits dataset
+│	│   ├── evaluate.py                     # Contains evaluation and plotting functions
+│	│   ├── dataloader.py                   # Constructs PyTorch DataLoaders
+│	│   ├── model.py                        # Defines the SentimentClassifier model architecture
+│	│   ├── trainer.py                      # Contains training routines and plotting functions
+│   └── inference.py                        # Provides sentiment prediction for new inputs
+├── tests/
+│   ├── evaluation/
+│   │   └── evaluate_model.py               # Function used by github workflow for model evaluation.
+├── .gitattributes                            
+├── Dockerfile
+├── LICENSE
+├── launch_k8s.ps1
+├── config.py                               # Configuration settings (paths, model parameters, etc.)
+├── README.md                               # Project documentation (this file)
+└── requirements.txt                        # Dependencies required to run the project
 
 how to start project :
 1) launch docker desktop
