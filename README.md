@@ -1,11 +1,10 @@
 # MLOps Project -- End-to-End Sentiment Analysis Pipeline
 
-## Project Overview
 This project demonstrates a complete MLOps workflow for a semtiment analysis model, covering every step from data ingestion to deployment and monitoring.
 It uses a modular design to ensure scalability, reproducibility, and observability of machine learning system in production.
 
 The system includes : 
-- Model Training & Evaluzation using Putorch
+- Model Training & Evaluzation using Pytorch
 - FastAPI backend for model serving
 - Streamlit dashboard for visualization and predictions
 - SQLite databse for prediction logging
@@ -13,8 +12,25 @@ The system includes :
 - Prometheus & Grafana for metrics and monitoring
 
 ---
+## Table of Contents :
+- [Introduction](#Introdution)
+- [Project Overview](#Project-Overview)
+    - [Architecture Overview](#Architecture-Overview)
+    - [Objective](#Objective)
+    - [Challenge & Solution](#Challenge-&-Solution)
+- [Repository Structure](#Repository-Structure)
+- [Installation & Setup](#Installation-&-Setup)
+- [Usage](#Usage)
+    - [FastAPI Inference](#FastAPI-Inference)
+    - [Streamlit Dashboard](#Streamlit-Dashboard)
+- [Technologies Used](#Technologies-Used)
+- [Example workflow](#Example-workflow)
+- [Future improvement](#Future-improvement)
+- [Author](#Author)  
+---
 
-## Architecture Overview : 
+## Project Overview : 
+### Architecture Overview : 
 
 ![Workflow Diagram](assets/images/molps-project-workflow-v2.svg)
 
@@ -74,6 +90,116 @@ README.md
 requirements.txt
 ```
 ---
+
+## Installation & Setup
+
+1) Clone the repository
+```Python
+git clone https://github.com/Anseuradel/MLOps-Project.git
+cd MLOps-Project
+```
+
+2) Create environment (optional, for local run)
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+3) Run with docker compose
+```bash
+docker compose up --build
+```
+
+This will start:
+
+- 🧠 ml-service-fastapi at http://localhost:8000
+
+- 💻 streamlit_app at http://localhost:8501
+
+---
+## Usage
+### FastAPI inference :
+
+You can send a prediction request directly:
+```bash
+curl -X POST "http://localhost:8000/predict" \
+     -H "Content-Type: application/json" \
+     -d '{"text": "I love this product!"}'
+```
+Response Example :
+```json
+{
+  "text": "I love this product!",
+  "prediction_label": "positive",
+  "confidence": 0.98,
+  "model_type": "SentimentClassifier",
+  "processing_time_ms": 25.3
+}
+```
+The prediction is also stored automatically in the SQLite database.
+
+## Streamlit Dashboard :
+
+Navigate to: http://localhost:8501
+
+You’ll find three main tabs:
+
+- Prediction — Enter text, view results in real time
+
+- Model Info — Display evaluation plots from latest training
+
+- Prediction Logs — View historical predictions from SQLite
+
+---
+## Technologies Used :
+| Layer                | Tool                   |
+| -------------------- | ---------------------- |
+| **Language**         | Python 3.11            |
+| **Frameworks**       | FastAPI, Streamlit     |
+| **Modeling**         | PyTorch, Transformers  |
+| **Database**         | SQLite3                |
+| **Containerization** | Docker, Docker Compose |
+| **Monitoring**       | Prometheus, Grafana    |
+| **Version Control**  | Git & GitHub           |
+
+---
+## Example workflow :
+
+1. Train model with scripts in src/model/
+
+2. Export results and evaluation plots to /outputs
+
+3. Build and deploy services using Docker Compose
+
+4. Predict via API or Streamlit UI
+
+5. Review metrics and logs for feedback loop
+
+6. Retrain model if performance drops
+
+---
+## Future Improvements :
+
+- [ ] Integrate CI/CD pipeline (GitHub Actions)
+
+- [ ] Move to PostgreSQL or MongoDB for scalability
+
+- [ ] Add real-time monitoring dashboard in Streamlit
+
+- [ ] Deploy to cloud (AWS/GCP/Azure)
+
+- [ ] Implement model registry with MLflow
+
+---
+## Author : 
+
+Adel Anseur
+
+📧 [Github Profile](https://www.linkedin.com/in/florian-hounkpatin/) | [Kaggle Profile](https://www.kaggle.com/adelanseur) | [Linkedin Profile](https://www.linkedin.com/in/adel-anseur1234)
+
+🚀 Passionate about Data Science, AI Deployment, and MLOps
+
 
 how to start project :
 1) launch docker desktop
