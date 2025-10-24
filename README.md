@@ -1,22 +1,20 @@
 # MLOps Project -- End-to-End Sentiment Analysis Pipeline
 
-This project demonstrates a complete MLOps workflow for a semtiment analysis model, covering every step from data ingestion to deployment and monitoring.
-It uses a modular design to ensure scalability, reproducibility, and observability of machine learning system in production.
+[![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C.svg?style=flat&logo=pytorch)](https://pytorch.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688.svg?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=flat&logo=docker)](https://www.docker.com/)
 
-The system includes : 
-- Model Training & Evaluzation using Pytorch
-- FastAPI backend for model serving
-- Streamlit dashboard for visualization and predictions
-- SQLite databse for prediction logging
-- Docker Compose orchestration for local deployment
-- Prometheus & Grafana for metrics and monitoring
+A comprehensive MLOps pipeline for sentiment analysis that demonstrates production-grade machine learning from data collection to deployment and monitoring. A production-ready sentiment analysis system that demonstrates complete ML lifecycle management using real-world app review data.
 
 ---
 ## Table of Contents :
 - [Introduction](#Introdution)
 - [Project Overview](#Project-Overview)
-    - [Architecture Overview](#Architecture-Overview)
+    - [Project Goals & Motivation](#Project-Goals-&-Motivation)
     - [Objective](#Objective)
+    - [Architecture Overview](#Architecture-Overview)
+    - [Data Source](#Data-Source)
     - [Challenge & Solution](#Challenge-&-Solution)
 - [Repository Structure](#Repository-Structure)
 - [Installation & Setup](#Installation-&-Setup)
@@ -30,11 +28,49 @@ The system includes :
 ---
 
 ## Project Overview : 
+
+### Project Goals & Motivation
+
+This project serves as a portfolio piece that demonstrates:
+- **End-to-End Product Development**: From data extraction to visualization
+- **Real-World Application**: Simulating company scenarios for analyzing app reviews
+- **Technical Complexity**: Showcasing advanced MLOps skills for production deployment
+- **Practical Implementation**: Applying theoretical knowledge to build complete ML systems
+
+### Objective
+
+Build a production-ready sentiment analysis system using BERT that:
+- Extracts real-world data from Play Store app reviews
+- Processes and analyzes text using state-of-the-art NLP techniques
+- Provides real-time inference through REST APIs
+- Offers interactive visualization and monitoring
+- Ensures reproducibility and scalability through containerization
+
+
 ### Architecture Overview : 
 
 ![Workflow Diagram](assets/images/molps-project-workflow-v2.svg)
 
 *Diagram created with [Excalidraw](https://excalidraw.com/)*
+
+### Data Source
+The project uses real-world data collected from:
+
+- Top 10 most popular Play Store apps' reviews
+
+- Manually scraped and processed for training
+
+- Represents genuine user sentiments across different app categories
+
+### Challenge & Solution
+
+| Challenge | Solution |
+|-----------|----------|
+| Real-world data collection | Scraped reviews from top 10 Play Store apps |
+| Production deployment | Docker containerization with FastAPI |
+| Model monitoring | Prometheus & Grafana integration |
+| Data persistence | SQLite database for prediction logging |
+| User interaction | Streamlit dashboard for visualization |
 
 ## Repository Structure : 
 
@@ -113,9 +149,13 @@ docker compose up --build
 
 This will start:
 
-- 🧠 ml-service-fastapi at http://localhost:8000
+-  ml-service-fastapi at http://localhost:8000
 
-- 💻 streamlit_app at http://localhost:8501
+-  streamlit_app at http://localhost:8501
+
+-  Grafana Monitoring: http://localhost:3000
+
+-  Prometheus Metrics: http://localhost:9090
 
 ---
 ## Usage
