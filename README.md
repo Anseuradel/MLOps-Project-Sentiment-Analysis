@@ -68,7 +68,6 @@ The project uses real-world data collected from:
 |-----------|----------|
 | Real-world data collection | Scraped reviews from top 10 Play Store apps |
 | Production deployment | Docker containerization with FastAPI |
-| Model monitoring | Prometheus & Grafana integration |
 | Data persistence | SQLite database for prediction logging |
 | User interaction | Streamlit dashboard for visualization |
 
@@ -153,10 +152,6 @@ This will start:
 
 -  streamlit_app at http://localhost:8501
 
--  Grafana Monitoring: http://localhost:3000
-
--  Prometheus Metrics: http://localhost:9090
-
 ---
 ## Usage
 ### FastAPI inference :
@@ -200,7 +195,6 @@ You’ll find three main tabs:
 | **Modeling**         | PyTorch, Transformers  |
 | **Database**         | SQLite3                |
 | **Containerization** | Docker, Docker Compose |
-| **Monitoring**       | Prometheus, Grafana    |
 | **Version Control**  | Git & GitHub           |
 
 ---
