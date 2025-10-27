@@ -32,9 +32,9 @@ st.write("Analyze text sentiment using a deployed FastAPI ML model.")
 API_URL = "http://ml-service-fastapi:8000/predict"
 
 # Sidebar
-st.sidebar.header("⚙️ Model Settings")
-use_mock = st.sidebar.checkbox("Use Mock Model", value=True)
-st.sidebar.write("Switch to real model by setting USE_MOCK=false in docker-compose.")
+# st.sidebar.header("⚙️ Model Settings")
+# use_mock = st.sidebar.checkbox("Use Mock Model", value=True)
+# st.sidebar.write("Switch to real model by setting USE_MOCK=false in docker-compose.")
 
 # Reload model
 use_mock = st.radio("Select model:", ["Mock", "Real"])
