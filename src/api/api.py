@@ -178,7 +178,9 @@ async def predict(request: PredictionRequest):
                 truncation=True,
                 max_length=128,
             )
-            toks = {k: v.to(device) for k, v in toks.items()}
+            # toks = {k: v.to(device) for k, v in toks.items()}
+            # keep only the keys our model expects
+            toks = {k: v.to(device) for k, v in toks.items() if k in ["input_ids", "attention_mask"]
             with torch.no_grad():
                 logits = model(**toks)
                 if isinstance(logits, tuple):
