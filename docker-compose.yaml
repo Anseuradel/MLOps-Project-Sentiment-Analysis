@@ -12,7 +12,7 @@ services:
       MODEL_REPO: "Adelanseur/MLOps-Project"
       MODEL_FILE: "best_model.pth"
       MODEL_PATH: "outputs/best_model.pth"
-      NUM_CLASSES: "5"
+      NUM_CLASSES: "6"
       HF_TOKEN: ""                 # optional (if your repo is private)
       LOG_LEVEL: "INFO"
     command: uvicorn src.api.api:app --host 0.0.0.0 --port 8000 --reload
