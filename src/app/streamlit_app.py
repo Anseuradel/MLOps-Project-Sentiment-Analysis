@@ -36,6 +36,16 @@ st.sidebar.header("⚙️ Model Settings")
 use_mock = st.sidebar.checkbox("Use Mock Model", value=True)
 st.sidebar.write("Switch to real model by setting USE_MOCK=false in docker-compose.")
 
+# Reload model
+use_mock = st.radio("Select model:", ["Mock", "Real"])
+
+if st.button("Reload Model"):
+    response = requests.post(
+        "http://ml-service-fastapi:8000/reload_model",
+        json={"use_mock": use_mock == "Mock"}
+    )
+    st.write(response.json())
+
 # -----------------------------
 # Helper functions
 # -----------------------------

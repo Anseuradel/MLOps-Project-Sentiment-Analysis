@@ -5,6 +5,7 @@ import logging
 from datetime import datetime
 from time import time
 from typing import Optional, Literal, Dict
+from pydantic import BaseModel
 
 import numpy as np
 import torch
@@ -231,3 +232,36 @@ async def predict(request: PredictionRequest):
 async def predict_debug(request: Request):
     raw_body = await request.body()
     return {"raw_body": raw_body.decode(), "headers": dict(request.headers)}
+
+# ------------------------------------------------------------------------------  
+# Endpoint: Dynamically reload model (Mock or Real)  
+# ------------------------------------------------------------------------------  
+class ReloadRequest(BaseModel):
+    use_mock: bool
+
+@app.post("/reload_model")
+async def reload_model(req: ReloadRequest):
+    """
+    Dynamically reload either the MockSentimentClassifier or the real model without restarting the container.
+    """
+    global model, USE_MOCK, tokenizer
+
+    USE_MOCK = req.use_mock
+    tokenizer = None  # reset tokenizer if switching models
+
+    try:
+        if USE_MOCK:
+            model = MockSentimentClassifier(n_classes=NUM_CLASSES)
+            msg = "MockSentimentClassifier loaded successfully."
+        else:
+            model = try_load_real_model()
+            msg = "Real SentimentClassifier loaded successfully."
+
+        logger.info(msg)
+        return {"status": "success", "message": msg, "use_mock": USE_MOCK}
+
+    except Exception as e:
+        model_load_error.inc()
+        logger.exception("Failed to reload model dynamically.")
+        return {"status": "error", "message": f"Failed to reload model: {str(e)}"}
+
