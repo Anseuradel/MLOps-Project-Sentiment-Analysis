@@ -7,7 +7,7 @@ services:
       - "8000:8000"
     environment:
       # switch between real and mock models
-      USE_MOCK: "true"             # change to "false" to use real model
+      USE_MOCK: "false"             # change to "false" to use real model
       MODEL_NAME: "prajjwal1/bert-tiny"
       MODEL_REPO: "Adelanseur/MLOps-Project"
       MODEL_FILE: "best_model.pth"
