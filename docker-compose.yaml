@@ -18,6 +18,12 @@ services:
     command: uvicorn src.api.api:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - ./db:/app/db # Mounts host db folder into container
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
   streamlit_app:
     build: .
@@ -25,8 +31,9 @@ services:
     command: streamlit run src/app/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
     ports:
       - "8501:8501"
-    depends_on: 
-      - ml-service-fastapi
+    depends_on:
+      ml-service-fastapi:
+        condition: service_healthy
     volumes:
       - ./outputs:/app/outputs
       - ./db:/app/db
