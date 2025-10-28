@@ -32,7 +32,7 @@ services:
     ports:
       - "8501:8501"
     depends_on:
-      ml-service-fastapi:
+      - ml-service-fastapi
         # condition: service_healthy
     volumes:
       - ./outputs:/app/outputs
