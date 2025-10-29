@@ -66,24 +66,24 @@ def try_load_real_model():
     model_file_path = None
     logger.info(f"Attempting to download {MODEL_FILE} from HF repo {MODEL_REPO} ...")
 
-            # ---- Clear old Hugging Face cache to ensure fresh model ----
-            cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
-            if os.path.exists(cache_dir):
-                logger.info("Clearing old Hugging Face model cache...")
-                shutil.rmtree(cache_dir)
+        # ---- Clear old Hugging Face cache to ensure fresh model ----
+        cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
+        if os.path.exists(cache_dir):
+            logger.info("Clearing old Hugging Face model cache...")
+            shutil.rmtree(cache_dir)
 
-            # ---- Handle optional token ----
-            if HF_TOKEN:
-                HfFolder.save_token(HF_TOKEN)
+        # ---- Handle optional token ----
+        if HF_TOKEN:
+            HfFolder.save_token(HF_TOKEN)
 
-            # ---- Force download of the latest model version ----
-            model_file_path = hf_hub_download(
-                repo_id=MODEL_REPO,
-                filename=MODEL_FILE,
-                force_download=True  # ensures you don’t use stale files
-            )
+        # ---- Force download of the latest model version ----
+        model_file_path = hf_hub_download(
+            repo_id=MODEL_REPO,
+            filename=MODEL_FILE,
+            force_download=True  # ensures you don’t use stale files
+        )
 
-            logger.info(f"Downloaded model file to: {model_file_path}")
+        logger.info(f"Downloaded model file to: {model_file_path}")
 
     except Exception as e:
         logger.warning(f"Could not download from HF: {e}")
