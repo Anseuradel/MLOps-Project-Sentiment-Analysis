@@ -6,6 +6,7 @@ from datetime import datetime
 from time import time
 from typing import Optional, Literal, Dict
 from pydantic import BaseModel
+import shutil
 
 import numpy as np
 import torch
@@ -22,6 +23,7 @@ from huggingface_hub import hf_hub_download, HfFolder
 from src.model.model import SentimentClassifier, MockSentimentClassifier
 # Load db function
 from src.api import database
+
 
 
 
@@ -62,14 +64,27 @@ def try_load_real_model():
     """Attempt to download model file from HF or use local path, then load weights."""
     # 1) attempt HF download if HF repo is set
     model_file_path = None
-    try:
-        if MODEL_REPO and MODEL_FILE:
-            logger.info(f"Attempting to download {MODEL_FILE} from HF repo {MODEL_REPO} ...")
-            # hf_hub_download will use HF_TOKEN env if set in HfFolder
+    logger.info(f"Attempting to download {MODEL_FILE} from HF repo {MODEL_REPO} ...")
+
+            # ---- Clear old Hugging Face cache to ensure fresh model ----
+            cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
+            if os.path.exists(cache_dir):
+                logger.info("Clearing old Hugging Face model cache...")
+                shutil.rmtree(cache_dir)
+
+            # ---- Handle optional token ----
             if HF_TOKEN:
                 HfFolder.save_token(HF_TOKEN)
-            model_file_path = hf_hub_download(repo_id=MODEL_REPO, filename=MODEL_FILE)
+
+            # ---- Force download of the latest model version ----
+            model_file_path = hf_hub_download(
+                repo_id=MODEL_REPO,
+                filename=MODEL_FILE,
+                force_download=True  # ensures you don’t use stale files
+            )
+
             logger.info(f"Downloaded model file to: {model_file_path}")
+
     except Exception as e:
         logger.warning(f"Could not download from HF: {e}")
 
