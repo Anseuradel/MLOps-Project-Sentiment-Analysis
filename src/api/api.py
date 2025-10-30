@@ -62,16 +62,16 @@ tokenizer = None  # only used for real model path
 
 def try_load_real_model():
     """Attempt to download model file from HF or use local path, then load weights."""
-    # 1) attempt HF download if HF repo is set
     model_file_path = None
     logger.info(f"Attempting to download {MODEL_FILE} from HF repo {MODEL_REPO} ...")
 
-        # ---- Clear old Hugging Face cache to ensure fresh model ----
-        cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
-        if os.path.exists(cache_dir):
-            logger.info("Clearing old Hugging Face model cache...")
-            shutil.rmtree(cache_dir)
+    # ---- Clear old Hugging Face cache to ensure fresh model ----
+    cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
+    if os.path.exists(cache_dir):
+        logger.info("Clearing old Hugging Face model cache...")
+        shutil.rmtree(cache_dir)
 
+    try:
         # ---- Handle optional token ----
         if HF_TOKEN:
             HfFolder.save_token(HF_TOKEN)
