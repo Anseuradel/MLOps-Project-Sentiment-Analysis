@@ -7,6 +7,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc python3-dev && \
     rm -rf /var/lib/apt/lists/*
 RUN apt-get update && apt-get install -y sqlite3
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY src/ ./src
