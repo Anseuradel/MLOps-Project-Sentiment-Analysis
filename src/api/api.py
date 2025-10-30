@@ -116,6 +116,11 @@ def try_load_real_model():
     net.to(device)
     net.eval()
     logger.info("Real model loaded and ready.")
+
+    # DEBUG: print out the number of output classes
+    logger.info(f"Model loaded successfully — fc.out_features = {net.fc.out_features}")
+    logger.info(f"Model file used: {model_file_path}")
+
     return net
 
 # Initialize model at startup
@@ -203,6 +208,11 @@ async def predict(request: PredictionRequest):
                 probs_t = F.softmax(logits, dim=-1).cpu().numpy()[0]
                 pred_class = int(probs_t.argmax())
                 probs = probs_t
+
+                # Debug (optional)
+                logger.info(f"DEBUG | logits={logits.tolist()}")
+                logger.info(f"DEBUG | probs={probs.tolist()} | pred_class={pred_class}")
+
 
         label = LABELS[pred_class] if pred_class < len(LABELS) else str(pred_class)
         resp = PredictionResponse(
