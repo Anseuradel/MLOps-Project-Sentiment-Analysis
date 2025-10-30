@@ -35,7 +35,7 @@ services:
     # depends_on:
     #   - ml-service-fastapi
     depends_on:
-      fastapi-ml-service:
+      ml-service-fastapi:
         condition: service_healthy
     volumes:
       - ./outputs:/app/outputs
