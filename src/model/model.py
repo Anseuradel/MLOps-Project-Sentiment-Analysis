@@ -77,7 +77,7 @@ import numpy as np
 class MockSentimentClassifier:
     def __init__(self, n_classes=5):
         self.n_classes = n_classes
-        self.labels = ["very negative", "negative", "neutral", "positive", "very positive"]
+        self.labels = ["Horrible", "very negative", "negative", "neutral", "positive", "very positive"]
 
     def predict(self, texts):
         """Return a random class index for each text."""
