@@ -29,30 +29,46 @@ class SentimentClassifier(nn.Module):
         self.dropout = nn.Dropout(p=dropout_prob)
         self.fc = nn.Linear(self.bert.config.hidden_size, n_classes)
 
-    def forward(
-        self, input_ids: torch.Tensor, attention_mask: torch.Tensor
-    ) -> torch.Tensor:
-        """
-        Forward pass through the model. This method defines how data flows through our model.
+    # def forward(
+    #     self, input_ids: torch.Tensor, attention_mask: torch.Tensor
+    # ) -> torch.Tensor:
+    #     """
+    #     Forward pass through the model. This method defines how data flows through our model.
 
-        Args:
-            input_ids (torch.Tensor): Tokenized input IDs.
-            attention_mask (torch.Tensor): Attention mask for padding.
+    #     Args:
+    #         input_ids (torch.Tensor): Tokenized input IDs.
+    #         attention_mask (torch.Tensor): Attention mask for padding.
 
-        Returns:
-            torch.Tensor: Logits (raw scores before softmax).
-        """
-        # 1. Pass input to BERT
+    #     Returns:
+    #         torch.Tensor: Logits (raw scores before softmax).
+    #     """
+    #     # 1. Pass input to BERT
+    #     outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+
+    #     # 2. Extract pooled [CLS] representation
+    #     pooled_output = outputs.pooler_output
+
+    #     # 3. Apply dropout for regularization
+    #     dropped_output = self.dropout(pooled_output)
+
+    #     # 4. Pass through final linear layer to get logits
+    #     return self.fc(dropped_output)
+
+    # Testing new forward function to solve "horrible"  prediction bias
+    def forward(self, input_ids, attention_mask):
         outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+        last_hidden_state = outputs.last_hidden_state  # [batch, seq_len, hidden]
+        
+        # Mean pooling (ignoring padding tokens)
+        mask = attention_mask.unsqueeze(-1).expand(last_hidden_state.size()).float()
+        masked_sum = torch.sum(last_hidden_state * mask, dim=1)
+        mask_sum = torch.clamp(mask.sum(dim=1), min=1e-9)
+        mean_pooled = masked_sum / mask_sum
+    
+        dropped_output = self.dropout(mean_pooled)
+        logits = self.fc(dropped_output)
+        return logits
 
-        # 2. Extract pooled [CLS] representation
-        pooled_output = outputs.pooler_output
-
-        # 3. Apply dropout for regularization
-        dropped_output = self.dropout(pooled_output)
-
-        # 4. Pass through final linear layer to get logits
-        return self.fc(dropped_output)
 
 
 
