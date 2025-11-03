@@ -22,16 +22,6 @@ def load_file_by_type(file_path):
         raise FileNotFoundError(f"Error: File {file_path} not found.")
 
 
-def merge_score_labels(score): 
-
-  if score <= 1: 
-    return 0 # Negative
-  elif score ==2:
-    return 1  # Neutral
-  else:
-    return 2 # positive
-
-
 def load_data(file_path, merge_labels):
 
     try:
@@ -52,12 +42,8 @@ def load_data(file_path, merge_labels):
             )
 
         df["label_id"] = df["label"].map(LABEL_MAPPING).astype(int)
+        df["label_text"] = df["label_id"].map(SENTIMENT_MAPPING)
 
-        if merge_labels:
-         df["label_id"] = df["label_id"].apply(merge_score_labels)
-         df["label_text"] = df["label_id"].map(SENTIMENT_MAPPING_3_LABEL_VERSION)
-        else:
-         df["label_text"] = df["label_id"].map(SENTIMENT_MAPPING)
         
         # Then only return the columns needed for training
         return df[["text", "label_id", "label_text"]]
