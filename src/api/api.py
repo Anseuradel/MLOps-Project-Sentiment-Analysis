@@ -35,7 +35,7 @@ MODEL_REPO = os.getenv("MODEL_REPO", "Adelanseur/MLOps-Project")  # HF repo (opt
 MODEL_FILE = os.getenv("MODEL_FILE", "best_model.pth")            # file inside HF repo
 MODEL_PATH_LOCAL = os.getenv("MODEL_PATH", "outputs/best_model.pth")  # fallback local path
 MODEL_NAME = os.getenv("MODEL_NAME", "prajjwal1/bert-tiny")       # base HF model used for architecture
-NUM_CLASSES = int(os.getenv("NUM_CLASSES", "5"))
+NUM_CLASSES = int(os.getenv("NUM_CLASSES", "6"))
 HF_TOKEN = os.getenv("HF_TOKEN", None)  # optional, for private repos
 
 # device

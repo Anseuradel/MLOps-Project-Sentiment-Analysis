@@ -12,11 +12,6 @@ SENTIMENT_MAPPING = {
     5: "Really Positive",
 }
 
-SENTIMENT_MAPPING_3_LABEL_VERSION = {
-    1: "Negative",
-    2: "Neutral",
-    3: "Positive",
-}
 
 LABEL_MAPPING = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5}
 
