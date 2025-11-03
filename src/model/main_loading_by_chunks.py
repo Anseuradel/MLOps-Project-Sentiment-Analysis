@@ -124,8 +124,7 @@ def main():
     print("Evaluating model...\n")
     sentiment_mapper = (
         config.SENTIMENT_MAPPING
-        if config.N_CLASSES == 5
-        else config.SENTIMENT_MAPPING_3_LABEL_VERSION
+        config.N_CLASSES == 5
     )
     evaluate_and_plot(
         trained_model,
