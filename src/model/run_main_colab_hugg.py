@@ -40,27 +40,14 @@ if exit_code != 0:
     print(" ❌ main_loading_by_chunks.py failed, aborting push.")
     sys.exit(exit_code)
 
-# --- DEBUG: Check what was created ---
-print("\n🔍 DEBUG: Checking created files...")
-if os.path.exists("outputs/training_evaluation/"):
-    print("Contents of outputs/training_evaluation/:")
-    subprocess.run(["ls", "-la", "outputs/training_evaluation/"], check=False)
-    
-    # List all image files
-    print("\nImage files found:")
-    subprocess.run(["find", "outputs/training_evaluation/", "-type", "f", "(", "-name", "*.png", "-o", "-name", "*.jpg", "-o", "-name", "*.jpeg", ")"], check=False)
-
 # --- Push logs and plots to GitHub ---
 try:
     print("\n 📦 Adding code, logs, AND plots...")
     
-    # Add specific file types to ensure plots are included
+    # Add only the important files (skip cache files)
     subprocess.run(["git", "add", "*.py"], check=False)
-    subprocess.run(["git", "add", "outputs/training_evaluation/*.png"], check=False)  # Add PNG plots
-    subprocess.run(["git", "add", "outputs/training_evaluation/*.jpg"], check=False)  # Add JPG plots  
-    subprocess.run(["git", "add", "outputs/training_evaluation/*.txt"], check=False)  # Add log files
-    subprocess.run(["git", "add", "outputs/training_evaluation/*.json"], check=False) # Add JSON files
-    subprocess.run(["git", "add", "outputs/training_evaluation/"], check=False)  # Catch anything else
+    subprocess.run(["git", "add", "outputs/training_evaluation/"], check=False)
+    subprocess.run(["git", "add", ".gitignore"], check=False)  # Add gitignore if updated
 
     print("\nGit status after add:")
     subprocess.run(["git", "status"], check=False)
@@ -68,7 +55,10 @@ try:
     result = subprocess.run(["git", "diff", "--cached", "--quiet"])
     if result.returncode != 0:
         subprocess.run(["git", "commit", "-m", "Update training logs, code, and plots"], check=True)
-        subprocess.run(["git", "pull", "--rebase"], check=True)
+        
+        # Simple pull without rebase (safer for this case)
+        print("\n🔄 Pulling latest changes...")
+        subprocess.run(["git", "pull"], check=True)
         subprocess.run(["git", "push", "origin", "main"], check=True)
         print("\n ✅ Code + logs + plots pushed to GitHub")
     else:
