@@ -1,7 +1,7 @@
 import pandas as pd
 import json 
 
-from config import SENTIMENT_MAPPING, SENTIMENT_MAPPING_3_LABEL_VERSION, LABEL_MAPPING
+from config import SENTIMENT_MAPPING, LABEL_MAPPING
 
 def load_file_by_type(file_path):
 
