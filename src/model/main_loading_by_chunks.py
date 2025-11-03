@@ -122,9 +122,8 @@ def main():
 
     # Evaluate
     print("Evaluating model...\n")
-    sentiment_mapper = (
-        config.SENTIMENT_MAPPING,
-    )
+    sentiment_mapper = (config.SENTIMENT_MAPPING)
+    
     evaluate_and_plot(
         trained_model,
         test_data,
