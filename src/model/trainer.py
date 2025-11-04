@@ -14,12 +14,15 @@ from typing import Tuple, Dict, List
 from transformers import get_scheduler
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
+from sklearn.utils.class_weight import compute_class_weight
+
 
 from src.model.evaluate import evaluate
 from src.model.model import SentimentClassifier
 from config import MODEL_TRAINING_OUTPUT_DIR
 
 from huggingface_hub import HfApi, HfFolder, upload_file
+
 
 
 def train_epoch(
@@ -64,6 +67,25 @@ def train_epoch(
     return total_loss / len(data_loader), correct_predictions / total_samples
 
 
+# def train_model(
+#     model: SentimentClassifier,
+#     train_loader: DataLoader,
+#     val_loader: DataLoader,
+#     device: torch.device,
+#     epochs: int = 3,
+#     lr: float = 2e-5,
+#     run_folder: str = MODEL_TRAINING_OUTPUT_DIR,
+# ):
+#     model = model.to(device)
+#     loss_fn = nn.CrossEntropyLoss()
+#     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
+#     scheduler = get_scheduler(
+#         "linear",
+#         optimizer=optimizer,
+#         num_warmup_steps=0,
+#         num_training_steps=len(train_loader) * epochs,
+#     )
+
 def train_model(
     model: SentimentClassifier,
     train_loader: DataLoader,
@@ -74,7 +96,20 @@ def train_model(
     run_folder: str = MODEL_TRAINING_OUTPUT_DIR,
 ):
     model = model.to(device)
-    loss_fn = nn.CrossEntropyLoss()
+
+    #  Compute class weights based on training dataset
+    labels = train_loader.dataset.labels if hasattr(train_loader.dataset, "labels") else None
+    if labels is not None:
+        import numpy as np
+        classes = np.unique(labels)
+        class_weights = compute_class_weight(class_weight="balanced", classes=classes, y=labels)
+        class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
+        print(f" Using class weights: {class_weights}")
+        loss_fn = nn.CrossEntropyLoss(weight=class_weights)
+    else:
+        print(" Could not find dataset labels, using unweighted CrossEntropyLoss.")
+        loss_fn = nn.CrossEntropyLoss()
+
     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
     scheduler = get_scheduler(
         "linear",
