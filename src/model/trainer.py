@@ -100,10 +100,40 @@ def train_model(
     #  Compute class weights based on training dataset
     labels = train_loader.dataset.labels if hasattr(train_loader.dataset, "labels") else None
     if labels is not None:
+        # import numpy as np
+        # classes = np.unique(labels)
+        # class_weights = compute_class_weight(class_weight="balanced", classes=classes, y=labels)
+        # class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
         import numpy as np
-        classes = np.unique(labels)
-        class_weights = compute_class_weight(class_weight="balanced", classes=classes, y=labels)
+        import torch
+        from sklearn.utils.class_weight import compute_class_weight
+        
+        # Convert labels to a flat numpy array
+        labels = np.array(train_loader.dataset.labels)
+        unique_classes = np.unique(labels)
+        
+        # 🧮 Compute class weights safely
+        class_weights = compute_class_weight(
+            class_weight="balanced",
+            classes=unique_classes,
+            y=labels
+        )
+        
+        # 🛠 Ensure all expected classes (e.g. 0–5) are present
+        num_classes = model.fc.out_features if hasattr(model, "fc") else len(unique_classes)
+        if len(unique_classes) < num_classes:
+            print(f"⚠️ Missing some classes in current chunk — filling weights to {num_classes}.")
+            full_weights = np.ones(num_classes)
+            for i, cls in enumerate(unique_classes):
+                full_weights[int(cls)] = class_weights[i]
+            class_weights = full_weights
+        
+        # Convert to tensor
         class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
+        print(f"🧮 Using class weights: {class_weights}")
+        loss_fn = nn.CrossEntropyLoss(weight=class_weights)
+                                
+        
         print(f" Using class weights: {class_weights}")
         loss_fn = nn.CrossEntropyLoss(weight=class_weights)
     else:
