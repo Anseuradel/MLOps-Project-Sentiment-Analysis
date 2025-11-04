@@ -14,11 +14,11 @@ SENTIMENT_MAPPING = {
 
 # LABEL_MAPPING = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5}
 LABEL_MAPPING = {
-    "very negative": 0,
-    "negative": 1,
-    "neutral": 2,
-    "positive": 3,
-    "very positive": 4,
+    1.0: 0,  # very negative
+    2.0: 1,  # negative
+    3.0: 2,  # neutral
+    4.0: 3,  # positive
+    5.0: 4,  # very positive
 }
 
 # --------------------------------------------------------------------------
