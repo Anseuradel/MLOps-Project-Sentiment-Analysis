@@ -4,16 +4,22 @@ import os
 # --------------------------------------------------------------------------
 # Define 5-class sentiment mapping
 SENTIMENT_MAPPING = {
-    0: "Horrible",
-    1: "Really Negative",
-    2: "Negative",
-    3: "Neutral",
-    4: "Positive",
-    5: "Really Positive",
+    0: "very negative",
+    1: "negative",
+    2: "neutral",
+    3: "positive",
+    4: "very positive",
 }
 
 
-LABEL_MAPPING = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5}
+# LABEL_MAPPING = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5}
+LABEL_MAPPING = {
+    "very negative": 0,
+    "negative": 1,
+    "neutral": 2,
+    "positive": 3,
+    "very positive": 4,
+}
 
 # --------------------------------------------------------------------------
 # Model config
