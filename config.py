@@ -30,7 +30,7 @@ MODEL_NAME = "prajjwal1/bert-tiny"
 TOKENIZER_NAME = "prajjwal1/bert-tiny"
 
 EPOCHS = 3
-N_CLASSES = 6
+N_CLASSES = 5
 DROPOUT = 0.3
 MAX_LEN = 64
 TEST_SIZE = 0.1
