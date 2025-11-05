@@ -84,7 +84,7 @@ tab1, tab2, tab3 = st.tabs(["Prediction", "Model Info", "Prediction Logs"])
 # -----------------------------
 with tab1:
     st.header("🧠 Sentiment Prediction")
-    user_input = st.text_area("Enter your text:", height=150)
+    user_input = st.text_area("Enter your review:", height=150)
     if st.button("Predict"):
         try:
             response = requests.post(
