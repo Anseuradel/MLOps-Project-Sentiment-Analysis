@@ -29,7 +29,7 @@ LABEL_MAPPING = {
 MODEL_NAME = "prajjwal1/bert-tiny"
 TOKENIZER_NAME = "prajjwal1/bert-tiny"
 
-EPOCHS = 3
+EPOCHS = 10
 N_CLASSES = 5
 DROPOUT = 0.3
 MAX_LEN = 64
