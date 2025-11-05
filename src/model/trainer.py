@@ -23,6 +23,10 @@ from config import MODEL_TRAINING_OUTPUT_DIR
 
 from huggingface_hub import HfApi, HfFolder, upload_file
 
+import numpy as np
+import torch
+from sklearn.utils.class_weight import compute_class_weight
+
 
 
 def train_epoch(
@@ -67,25 +71,6 @@ def train_epoch(
     return total_loss / len(data_loader), correct_predictions / total_samples
 
 
-# def train_model(
-#     model: SentimentClassifier,
-#     train_loader: DataLoader,
-#     val_loader: DataLoader,
-#     device: torch.device,
-#     epochs: int = 3,
-#     lr: float = 2e-5,
-#     run_folder: str = MODEL_TRAINING_OUTPUT_DIR,
-# ):
-#     model = model.to(device)
-#     loss_fn = nn.CrossEntropyLoss()
-#     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
-#     scheduler = get_scheduler(
-#         "linear",
-#         optimizer=optimizer,
-#         num_warmup_steps=0,
-#         num_training_steps=len(train_loader) * epochs,
-#     )
-
 def train_model(
     model: SentimentClassifier,
     train_loader: DataLoader,
@@ -96,50 +81,7 @@ def train_model(
     run_folder: str = MODEL_TRAINING_OUTPUT_DIR,
 ):
     model = model.to(device)
-
-    #  Compute class weights based on training dataset
-    labels = train_loader.dataset.labels if hasattr(train_loader.dataset, "labels") else None
-    if labels is not None:
-        # import numpy as np
-        # classes = np.unique(labels)
-        # class_weights = compute_class_weight(class_weight="balanced", classes=classes, y=labels)
-        # class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
-        import numpy as np
-        import torch
-        from sklearn.utils.class_weight import compute_class_weight
-        
-        # Convert labels to a flat numpy array
-        labels = np.array(train_loader.dataset.labels)
-        unique_classes = np.unique(labels)
-        
-        # 🧮 Compute class weights safely
-        class_weights = compute_class_weight(
-            class_weight="balanced",
-            classes=unique_classes,
-            y=labels
-        )
-        
-        # 🛠 Ensure all expected classes (e.g. 0–5) are present
-        num_classes = model.fc.out_features if hasattr(model, "fc") else len(unique_classes)
-        if len(unique_classes) < num_classes:
-            print(f"⚠️ Missing some classes in current chunk — filling weights to {num_classes}.")
-            full_weights = np.ones(num_classes)
-            for i, cls in enumerate(unique_classes):
-                full_weights[int(cls)] = class_weights[i]
-            class_weights = full_weights
-        
-        # Convert to tensor
-        class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
-        print(f"🧮 Using class weights: {class_weights}")
-        loss_fn = nn.CrossEntropyLoss(weight=class_weights)
-                                
-        
-        print(f" Using class weights: {class_weights}")
-        loss_fn = nn.CrossEntropyLoss(weight=class_weights)
-    else:
-        print(" Could not find dataset labels, using unweighted CrossEntropyLoss.")
-        loss_fn = nn.CrossEntropyLoss()
-
+    loss_fn = nn.CrossEntropyLoss()
     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
     scheduler = get_scheduler(
         "linear",
@@ -147,6 +89,61 @@ def train_model(
         num_warmup_steps=0,
         num_training_steps=len(train_loader) * epochs,
     )
+
+# def train_model(
+#     model: SentimentClassifier,
+#     train_loader: DataLoader,
+#     val_loader: DataLoader,
+#     device: torch.device,
+#     epochs: int = 3,
+#     lr: float = 2e-5,
+#     run_folder: str = MODEL_TRAINING_OUTPUT_DIR,
+# ):
+#     model = model.to(device)
+
+#     #  Compute class weights based on training dataset
+#     labels = train_loader.dataset.labels if hasattr(train_loader.dataset, "labels") else None
+#     if labels is not None:
+        
+#         # Convert labels to a flat numpy array
+#         labels = np.array(train_loader.dataset.labels)
+#         unique_classes = np.unique(labels)
+        
+#         # 🧮 Compute class weights safely
+#         class_weights = compute_class_weight(
+#             class_weight="balanced",
+#             classes=unique_classes,
+#             y=labels
+#         )
+        
+#         # 🛠 Ensure all expected classes (e.g. 0–5) are present
+#         num_classes = model.fc.out_features if hasattr(model, "fc") else len(unique_classes)
+#         if len(unique_classes) < num_classes:
+#             print(f"⚠️ Missing some classes in current chunk — filling weights to {num_classes}.")
+#             full_weights = np.ones(num_classes)
+#             for i, cls in enumerate(unique_classes):
+#                 full_weights[int(cls)] = class_weights[i]
+#             class_weights = full_weights
+        
+#         # Convert to tensor
+#         class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
+#         print(f"🧮 Using class weights: {class_weights}")
+#         loss_fn = nn.CrossEntropyLoss(weight=class_weights)
+                                
+        
+#         print(f" Using class weights: {class_weights}")
+#         loss_fn = nn.CrossEntropyLoss(weight=class_weights)
+#     else:
+#         print(" Could not find dataset labels, using unweighted CrossEntropyLoss.")
+#         loss_fn = nn.CrossEntropyLoss()
+
+#     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
+#     scheduler = get_scheduler(
+#         "linear",
+#         optimizer=optimizer,
+#         num_warmup_steps=0,
+#         num_training_steps=len(train_loader) * epochs,
+#     )
 
     # Create timestamped folder for this training run
     timestamp = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
