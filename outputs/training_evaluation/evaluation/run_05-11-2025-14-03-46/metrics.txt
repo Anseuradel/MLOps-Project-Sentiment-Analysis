@@ -1,0 +1,2 @@
+Validation Loss: 0.7154
+Validation Accuracy: 0.7207
