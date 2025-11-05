@@ -159,7 +159,11 @@ class PredictionResponse(BaseModel):
 # Helper: label mapper
 # ------------------------------------------------------------------------------
 # If you have textual labels mapping in config, you can read it from env or config
-DEFAULT_LABELS = ["Horrible","very negative", "negative", "neutral", "positive", "very positive"]
+DEFAULT_LABELS = ["very negative",
+                  "negative",
+                  "neutral",
+                  "positive",
+                  "very positive"]
 LABELS = DEFAULT_LABELS[:NUM_CLASSES] if len(DEFAULT_LABELS) >= NUM_CLASSES else [str(i) for i in range(NUM_CLASSES)]
 
 # ------------------------------------------------------------------------------
