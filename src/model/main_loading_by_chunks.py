@@ -31,8 +31,10 @@ def update_last_chunk_state(chunk_idx, state_file="last_chunk.txt"):
 
 def dataloader_train_test_val(df):
     tokenizer = AutoTokenizer.from_pretrained(config.TOKENIZER_NAME)
+    
+    # change use_weighted_sampler to false to stop using weighted sampler 
     data = create_dataloader(
-        df, tokenizer, max_len=config.MAX_LEN, batch_size=config.BATCH_SIZE
+        df, tokenizer, max_len=config.MAX_LEN, batch_size=config.BATCH_SIZE, use_weighted_sampler=True
     )
     return data
 
