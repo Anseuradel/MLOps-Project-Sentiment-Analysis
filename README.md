@@ -19,11 +19,16 @@ A comprehensive MLOps pipeline for sentiment analysis that demonstrates producti
 - [Repository Structure](#Repository-Structure)
 - [Installation & Setup](#Installation-&-Setup)
 - [Usage](#Usage)
-    - [FastAPI Inference](#FastAPI-Inference)
+    - [Configuration overview](#Configuration-Overview)
     - [Streamlit Dashboard](#Streamlit-Dashboard)
+    - [Data Extraction & Processing](#Data-Extraction-&-Processing)
+    - [Model Training & Evaluation](#Model-Training-&-Evaluation)
+    - [Docker & MLOps Pipeline](@Docker-&-MLOps-Pipeline)
+    - [FastAPI Inference](#FastAPI-Inference)
 - [Technologies Used](#Technologies-Used)
 - [Example workflow](#Example-workflow)
 - [Future improvement](#Future-improvement)
+- [References](#References) 
 - [Author](#Author)  
 ---
 
@@ -275,7 +280,7 @@ PRETRAINED_MODEL_PATH = "outputs/training_evaluation/training/run_05-11-2025-14-
 Specifies the location of the trained model used during inference via the FastAPI backend.
 Update this path whenever you retrain or fine-tune a new model.
 
-## Data Extraction & Processing
+### Data Extraction & Processing
 1️⃣ Data Extraction
 
 - Loads the Amazon Reviews JSONL dataset from the specified path (Dataset/Gift_Cards.jsonl).
@@ -309,15 +314,15 @@ Truncate/pad sequences to MAX_LEN = 128
 
 - Supports chunk-based loading to handle massive datasets efficiently.
 
-## Model Training & Evaluation
+### Model Training & Evaluation
 
-### Model :
+#### Model :
 
 - Fine-tunes tiny-bert for 5-class sentiment classification.
 
 - Adds a dropout layer (DROPOUT = 0.3) and a fully connected output layer (fc.out_features = 5).
 
-### Loss & Optimization :
+#### Loss & Optimization :
 
 - Implements weighted cross-entropy loss to mitigate class imbalance.
 
@@ -325,7 +330,7 @@ Truncate/pad sequences to MAX_LEN = 128
 
 - Scheduler: Linear learning rate decay.
 
-### Metrics:
+#### Metrics:
 
 - Accuracy, Precision, Recall, and F1-score per class.
 
@@ -340,7 +345,7 @@ Truncate/pad sequences to MAX_LEN = 128
     - accuracy_and_loss_plot.png
 
 
-## FastAPI inference :
+### FastAPI inference :
 
 You can send a prediction request directly:
 ```bash
@@ -360,8 +365,8 @@ Response Example :
 ```
 The prediction is also stored automatically in the SQLite database.
 
-## Docker & MLOps Pipeline
-### Dockerized Architecture :
+### Docker & MLOps Pipeline
+#### Dockerized Architecture :
 
 This project uses a multi-container setup managed by Docker Compose:
 
@@ -372,12 +377,12 @@ This project uses a multi-container setup managed by Docker Compose:
 | `sqlite`             | Lightweight local database for storing predictions |
 
 
-### Run the full stack :
+#### Run the full stack :
 ```bash
 docker compose up --build
 ```
 
-### Key Features :
+#### Key Features :
 
 - Reproducibility — consistent environment across machines.
 
