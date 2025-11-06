@@ -52,10 +52,14 @@ st.markdown("""
         background-color: #1E1E1E !important;
         color: #E0E0E0 !important;
     }
+    textarea::placeholder {
+        color: #8C8C8C !important;
+        opacity: 0.6 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🧠 Sentiment Analysis Dashboard")
+st.title("Sentiment Analysis Dashboard")
 st.write("Analyze text sentiment using a deployed FastAPI ML model.")
 
 API_URL = "http://ml-service-fastapi:8000/predict"
@@ -105,147 +109,121 @@ def load_plot(output_folder, plot_name="accuracy_plot.png"):
 
 
 # ------------------------------------------------------
-# 🧭 Sidebar Navigation
+# Sidebar content (Permanent)
 # ------------------------------------------------------
-sidebar_selection = st.sidebar.radio(
-    "📚 Navigation",
-    ["App", "About", "FAQ / Improvements", "Credits"]
-)
+st.sidebar.header("💡 About")
+st.sidebar.info("""
+This interactive dashboard predicts the **sentiment** of user-provided text  
+using a fine-tuned **BERT** model deployed with **FastAPI**.
 
-# Sidebar footer
-st.sidebar.markdown("---")
-st.sidebar.markdown("**Built with ❤️ by Adel Anseur**")
+It supports multiple sentiment levels from *very negative* to *very positive*.
+""")
+
+st.sidebar.header("🛠️ FAQ / Improvements")
+st.sidebar.markdown("""
+**Q1:** *Why does it misclassify some neutral reviews?*  
+→ The dataset is slightly imbalanced. Adding more balanced neutral samples could help.
+
+**Q2:** *Can inference be faster?*  
+→ Yes — deploy on GPU or optimize model weights via distillation.
+
+**Next Steps:**  
+- 🔤 Multilingual support  
+- 📈 Explainability (SHAP / LIME)  
+- 🌐 Online fine-tuning pipeline  
+""")
+
+st.sidebar.header("👨‍💻 Credits")
+st.sidebar.markdown("""
+**Author:** [Adel Anseur](https://github.com/adelanseur)  
+**Stack:** Streamlit · FastAPI · PyTorch · Transformers · Docker · Plotly  
+""")
 
 # -----------------------------
 # Main App Interface
 # -----------------------------
-if sidebar_selection == "App":
-  tab1, tab2, tab3 = st.tabs(["Prediction", "Model Info", "Prediction Logs"])
+tab1, tab2, tab3 = st.tabs(["Prediction", "Model Info", "Prediction Logs"])
 
-  # -----------------------------
-  # Prediction Tab
-  # -----------------------------
-  with tab1:
-      st.header("🧠 Sentiment Prediction")
-      user_input = st.text_area("Enter your review:", height=150)
-      if st.button("Predict"):
-          try:
-              response = requests.post(
-                  API_URL,
-                  json={"text": user_input},
-                  timeout=5
-              )
-              if response.status_code == 200:
-                  result = response.json()
-                  st.success(f"Prediction: {result['prediction_label']}")
-                  st.write(f"Confidence: {result.get('confidence', 0):.2f}")
-              else:
-                  st.error(f"Error calling prediction API: {response.text}")
-          except requests.exceptions.RequestException as e:
-              st.error(f"Connection error: {e}")
-  
-  # -----------------------------
-  # Model Info Tab
-  # -----------------------------
-  with tab2:
-      st.header("📊 Model Evaluation & Metrics")
-      latest_folder = get_latest_output_folder("outputs/training_evaluation/evaluation")
-      
-      if latest_folder:
-          st.subheader(f"Latest Outputs Folder: {latest_folder}")
-          
-          # Load metrics.txt
-          metrics_file = os.path.join(latest_folder, "metrics.txt")
-          if os.path.exists(metrics_file):
-              with open(metrics_file) as f:
-                  metrics_content = f.read()
-              st.text_area("Metrics.txt", metrics_content, height=200)
-          else:
-              st.warning("No metrics.txt found in latest folder.")
-          
-          # Load and display PNG plots
-          plot_files = [
-              "classification_report.png",
-              "confusion_matrix.png",
-              "confidence_histogram.png"
-          ]
-          
-          for plot_name in plot_files:
-              plot_path = os.path.join(latest_folder, plot_name)
-              if os.path.exists(plot_path):
-                  img = Image.open(plot_path)
-                  st.image(img, caption=plot_name.replace("_", " ").replace(".png", ""), use_container_width=True)
-              else:
-                  st.warning(f"{plot_name} not found in latest folder.")
-          
-          # Optional: display timestamp of last update
-          timestamp = datetime.fromtimestamp(os.path.getmtime(latest_folder))
-          st.caption(f"Last updated: {timestamp}")
-      else:
-          st.warning("No outputs folder found.")
-  
-  # -----------------------------
-  # Prediction Logs Tab
-  # -----------------------------
-  with tab3:
-      st.header("🗃️ Recent Prediction Logs")
-      rows = database.fetch_recent_predictions(limit=20)
-      if not rows:
-          st.warning("No predictions logged yet.")
-      else:
-          # Convert to DataFrame for nicer display
-          df = pd.DataFrame(rows, columns=[
-              "timestamp", "input_text", "predicted_label", 
-              "confidence", "model_version", "model_type", "latency_ms"
-          ])
-          df["timestamp"] = pd.to_datetime(df["timestamp"])
-          st.dataframe(df, use_container_width=True)
+# -----------------------------
+# Prediction Tab
+# -----------------------------
+with tab1:
+    st.header("Sentiment Prediction")
+    user_input = st.text_area(
+        "Enter your review:",
+        height=150,
+        placeholder="e.g. I absolutely love this product! or This was the worst experience ever..."
+        )
+    if st.button("Predict"):
+        try:
+            response = requests.post(
+                API_URL,
+                json={"text": user_input},
+                timeout=5
+            )
+            if response.status_code == 200:
+                result = response.json()
+                st.success(f"Prediction: {result['prediction_label']}")
+                st.write(f"Confidence: {result.get('confidence', 0):.2f}")
+            else:
+                st.error(f"Error calling prediction API: {response.text}")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Connection error: {e}")
 
-
-# ------------------------------------------------------
-# 📘 About Section
-# ------------------------------------------------------
-elif sidebar_selection == "About":
-    st.header("💡 About This App")
-    st.markdown("""
-    This interactive dashboard allows you to analyze text sentiment using a fine-tuned BERT model.  
-    The backend is powered by **FastAPI**, and the model was trained on Amazon reviews with class-weighted loss to ensure balanced sentiment predictions.
+# -----------------------------
+# Model Info Tab
+# -----------------------------
+with tab2:
+    st.header("📊 Model Evaluation & Metrics")
+    latest_folder = get_latest_output_folder("outputs/training_evaluation/evaluation")
     
-    **Features include:**
-    - Real-time sentiment prediction  
-    - Live model reloading  
-    - Visualization of model evaluation metrics  
-    - Access to recent prediction logs
-    """)
+    if latest_folder:
+        st.subheader(f"Latest Outputs Folder: {latest_folder}")
+        
+        # Load metrics.txt
+        metrics_file = os.path.join(latest_folder, "metrics.txt")
+        if os.path.exists(metrics_file):
+            with open(metrics_file) as f:
+                metrics_content = f.read()
+            st.text_area("Metrics.txt", metrics_content, height=200)
+        else:
+            st.warning("No metrics.txt found in latest folder.")
+        
+        # Load and display PNG plots
+        plot_files = [
+            "classification_report.png",
+            "confusion_matrix.png",
+            "confidence_histogram.png"
+        ]
+        
+        for plot_name in plot_files:
+            plot_path = os.path.join(latest_folder, plot_name)
+            if os.path.exists(plot_path):
+                img = Image.open(plot_path)
+                st.image(img, caption=plot_name.replace("_", " ").replace(".png", ""), use_container_width=True)
+            else:
+                st.warning(f"{plot_name} not found in latest folder.")
+        
+        # Optional: display timestamp of last update
+        timestamp = datetime.fromtimestamp(os.path.getmtime(latest_folder))
+        st.caption(f"Last updated: {timestamp}")
+    else:
+        st.warning("No outputs folder found.")
 
-# ------------------------------------------------------
-# 💬 FAQ / Improvements Section
-# ------------------------------------------------------
-elif sidebar_selection == "FAQ / Improvements":
-    st.header("🛠️ FAQ & Future Improvements")
-    st.markdown("""
-    **Q1: Why does the model sometimes confuse neutral and slightly negative texts?**  
-    → The dataset is imbalanced; neutral reviews are underrepresented. Future improvements include more balanced data and contextual augmentation.
-
-    **Q2: How can I make the predictions faster?**  
-    → Deploy the model on a GPU-backed API service like AWS Sagemaker or Hugging Face Inference Endpoints.
-
-    **Q3: What’s next?**  
-    - Add multilingual sentiment support 🌍  
-    - Include explainability (SHAP / LIME)  
-    - Interactive confidence calibration visualization  
-    """)
-
-# ------------------------------------------------------
-# 👨‍💻 Credits Section
-# ------------------------------------------------------
-elif sidebar_selection == "Credits":
-    st.header("👨‍💻 Credits")
-    st.markdown("""
-    **Developed by:** [Adel Anseur](https://github.com/adelanseur)  
-    **Project:** MLOps Sentiment Analysis  
-    **Stack:** Streamlit · FastAPI · PyTorch · Hugging Face Transformers · Docker · Plotly  
-
-    Thank you for exploring this project!
-    """)
+# -----------------------------
+# Prediction Logs Tab
+# -----------------------------
+with tab3:
+    st.header("🗃️ Recent Prediction Logs")
+    rows = database.fetch_recent_predictions(limit=20)
+    if not rows:
+        st.warning("No predictions logged yet.")
+    else:
+        # Convert to DataFrame for nicer display
+        df = pd.DataFrame(rows, columns=[
+            "timestamp", "input_text", "predicted_label", 
+            "confidence", "model_version", "model_type", "latency_ms"
+        ])
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        st.dataframe(df, use_container_width=True)
 
