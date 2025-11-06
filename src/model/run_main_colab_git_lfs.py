@@ -4,9 +4,9 @@ import sys
 
 # --- Run your training script ---
 print("\n Running training script...")
-exit_code = subprocess.call([sys.executable, "-m", "src.model.main_loading_by_chunks"])
+exit_code = subprocess.call([sys.executable, "-m", "src.model.main"])
 if exit_code != 0:
-    print(" main_loading_by_chunks.py failed, aborting push.")
+    print(" main.py failed, aborting push.")
     sys.exit(exit_code)
 
 # --- Git commands for Colab auto-push ---
