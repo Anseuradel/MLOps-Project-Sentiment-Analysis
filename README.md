@@ -152,6 +152,18 @@ This will start:
 
 -  streamlit_app at http://localhost:8501
 
+You’ll find three main tabs:
+
+- Prediction — Enter text, view results in real time
+
+![streamlit image 1](assets/images/MLOps-project-image-streamlit-1.png)
+
+- Model Info — Display evaluation plots from latest training
+
+![streamlit image 2](assets/images/MLOps-project-image-streamlit-2.png)
+
+- Prediction Logs — View historical predictions from SQLite
+
 ---
 ## Usage
 
@@ -266,18 +278,6 @@ Response Example :
 }
 ```
 The prediction is also stored automatically in the SQLite database.
-
-## Streamlit Dashboard :
-
-Navigate to: http://localhost:8501
-
-You’ll find three main tabs:
-
-- Prediction — Enter text, view results in real time
-
-- Model Info — Display evaluation plots from latest training
-
-- Prediction Logs — View historical predictions from SQLite
 
 ---
 ## Technologies Used :
