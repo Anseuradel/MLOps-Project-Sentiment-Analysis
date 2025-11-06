@@ -1,43 +1,13 @@
-# import os
-# import subprocess
-# import sys
-# from huggingface_hub import HfApi, HfFolder, upload_file
-
-# # --- Run your training script ---
-# print("\n 🚀 Running training script...")
-# exit_code = subprocess.call([sys.executable, "-m", "src.model.main_loading_by_chunks"])
-# if exit_code != 0:
-#     print(" ❌ main_loading_by_chunks.py failed, aborting push.")
-#     sys.exit(exit_code)
-
-# # --- Push logs to GitHub (without model) ---
-# try:
-#     print("\n 📦 Adding code & logs only (no .pth files)...")
-#     subprocess.run(["git", "add", "*.py"], check=False)
-#     subprocess.run(["git", "add", "outputs/training_evaluation/"], check=False)
-
-#     result = subprocess.run(["git", "diff", "--cached", "--quiet"])
-#     if result.returncode != 0:
-#         subprocess.run(["git", "commit", "-m", "Update training logs and code"], check=True)
-#         subprocess.run(["git", "pull", "--rebase"], check=True)
-#         subprocess.run(["git", "push", "origin", "main"], check=True)
-#         print("\n ✅ Code + logs pushed to GitHub")
-#     else:
-#         print("No code/log changes to commit, skipping GitHub push.")
-
-# except subprocess.CalledProcessError as e:
-#     print(f"\n ❌ GitHub push failed: {e}")
-
 import os
 import subprocess
 import sys
 from huggingface_hub import HfApi, HfFolder, upload_file
 
-# --- Run your training script ---
+# --- Run training script ---
 print("\n 🚀 Running training script...")
-exit_code = subprocess.call([sys.executable, "-m", "src.model.main_loading_by_chunks"])
+exit_code = subprocess.call([sys.executable, "-m", "src.model.main"])
 if exit_code != 0:
-    print(" ❌ main_loading_by_chunks.py failed, aborting push.")
+    print(" ❌ main.py failed, aborting push.")
     sys.exit(exit_code)
 
 # --- Push logs and plots to GitHub ---
