@@ -160,7 +160,7 @@ This will start:
 The configuration file defines all parameters, paths, and settings that control the behavior of the Amazon Reviews Sentiment Analysis pipeline.
 It centralizes the logic for model training, data loading, evaluation, and web app visualization — making it easy to adjust the system without modifying core code
 
-🧠 Sentiment Mappings
+#### 🧠 Sentiment Mappings
 
 5-Class Sentiment Mapping
 ```python
@@ -174,7 +174,7 @@ SENTIMENT_MAPPING = {
 ```
 This mapping converts the model’s numeric predictions into human-readable sentiment labels, representing a fine-grained 5-level sentiment scale used for Amazon product reviews.
 
-📦 Dataset Configuration
+#### 📦 Dataset Configuration
 Dataset Paths
 ```python
 DATASET_PATH = "Dataset/Gift_Cards.jsonl"
@@ -182,7 +182,7 @@ DATASET_PATH = "Dataset/Gift_Cards.jsonl"
 
 Main dataset used for fine-tuning and training.
 
-🤖 Model Configuration
+#### 🤖 Model Configuration
 Model and Tokenizer
 ```python
 TOKENIZER_NAME = "bert-base-uncased"
@@ -227,7 +227,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 Automatically selects GPU if available, otherwise uses CPU.
 
-💾 Output Directories
+#### 💾 Output Directories
 ```python
 MODEL_TRAINING_OUTPUT_DIR = "outputs/training_evaluation/training"
 MODEL_EVALUATION_OUTPUT_DIR = "outputs/training_evaluation/evaluation"
@@ -239,7 +239,7 @@ Each run automatically generates a timestamped folder, for example:
 outputs/training_evaluation/training/run_05-11-2025-14-30-10/
 ```
 
-🔍 Inference Configuration
+####🔍 Inference Configuration
 ```python
 PRETRAINED_MODEL_PATH = "outputs/training_evaluation/training/run_05-11-2025-14-30-10/best_model.pth"
 ```
