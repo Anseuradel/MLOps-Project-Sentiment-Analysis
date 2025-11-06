@@ -54,22 +54,38 @@ Build a production-ready sentiment analysis system using BERT that:
 *Diagram created with [Excalidraw](https://excalidraw.com/)*
 
 ### Data Source
-The project uses real-world data collected from:
 
-- Top 10 most popular Play Store apps' reviews
+#### 🧪 Initial Approach (Abandoned)
 
-- Manually scraped and processed for training
+- Scraped app reviews from the Google Play Store.
 
-- Represents genuine user sentiments across different app categories
+- Contained sensitive user data → discarded due to legal and ethical reasons.
+
+#### ✅ Final Approach :
+
+- Used the Amazon Reviews 2023 dataset (McAuley Lab, UC San Diego).
+
+- Includes:
+
+    - User reviews (ratings, text, helpfulness votes, etc.)
+
+    - Item metadata (title, category, price)
+
+    - Product relationships and user-item links
+
+Source: [Amazon review dataset](https://amazon-reviews-2023.github.io/)
+
 
 ### Challenge & Solution
 
-| Challenge | Solution |
-|-----------|----------|
-| Real-world data collection | Scraped reviews from top 10 Play Store apps |
-| Production deployment | Docker containerization with FastAPI |
-| Data persistence | SQLite database for prediction logging |
-| User interaction | Streamlit dashboard for visualization |
+| Challenge                    | Implemented Solution                                               |
+| ---------------------------- | ------------------------------------------------------------------ |
+| Real-world data collection   | Switched to a public, ethical dataset (Amazon Reviews 2023)        |
+| Large-scale dataset handling | Implemented chunk-based data loading and weighted sampling         |
+| Model interpretability       | Included confusion matrices and confidence histograms              |
+| Deployment                   | Containerized FastAPI + Streamlit with Docker Compose              |
+| Monitoring                   | SQLite database for prediction logging and Streamlit visualization |
+
 
 ## Repository Structure : 
 
@@ -259,7 +275,72 @@ PRETRAINED_MODEL_PATH = "outputs/training_evaluation/training/run_05-11-2025-14-
 Specifies the location of the trained model used during inference via the FastAPI backend.
 Update this path whenever you retrain or fine-tune a new model.
 
-### FastAPI inference :
+## Data Extraction & Processing
+1️⃣ Data Extraction
+
+- Loads the Amazon Reviews JSONL dataset from the specified path (Dataset/Gift_Cards.jsonl).
+
+- Handles multiple file formats (.csv, .jsonl, .xlsx, .txt).
+
+- Includes validation tests for missing or invalid data.
+
+2️⃣ Data Cleaning
+
+- Removes special characters, HTML tags, and null entries.
+
+- Converts ratings to sentiment labels via the defined mappings:
+```python
+LABEL_MAPPING = {1.0: 0, 2.0: 1, 3.0: 2, 4.0: 3, 5.0: 4}
+```
+
+3️⃣ Tokenization
+
+- Uses Hugging Face’s BERT tokenizer (tiny-bert) to:
+
+```python
+Truncate/pad sequences to MAX_LEN = 128
+```
+
+- Generate attention masks and token IDs
+
+4️⃣ DataLoader Creation
+
+- Uses PyTorch Datasets and WeightedRandomSampler to balance class distribution.
+
+- Supports chunk-based loading to handle massive datasets efficiently.
+
+## Model Training & Evaluation
+
+### Model :
+
+- Fine-tunes tiny-bert for 5-class sentiment classification.
+
+- Adds a dropout layer (DROPOUT = 0.3) and a fully connected output layer (fc.out_features = 5).
+
+### Loss & Optimization :
+
+- Implements weighted cross-entropy loss to mitigate class imbalance.
+
+- Optimizer: AdamW
+
+- Scheduler: Linear learning rate decay.
+
+### Metrics:
+
+- Accuracy, Precision, Recall, and F1-score per class.
+
+- Saves visualizations:
+
+    - confusion_matrix.png
+
+    - classification_report.png
+
+    - confidence_histogram.png
+
+    - accuracy_and_loss_plot.png
+
+
+## FastAPI inference :
 
 You can send a prediction request directly:
 ```bash
@@ -278,6 +359,33 @@ Response Example :
 }
 ```
 The prediction is also stored automatically in the SQLite database.
+
+## Docker & MLOps Pipeline
+### Dockerized Architecture :
+
+This project uses a multi-container setup managed by Docker Compose:
+
+| Service              | Description                                        |
+| -------------------- | -------------------------------------------------- |
+| `ml-service-fastapi` | FastAPI backend serving the BERT model             |
+| `streamlit_app`      | Interactive dashboard for end users                |
+| `sqlite`             | Lightweight local database for storing predictions |
+
+
+### Run the full stack :
+```bash
+docker compose up --build
+```
+
+### Key Features :
+
+- Reproducibility — consistent environment across machines.
+
+- Scalability — each service runs independently.
+
+- Monitoring — every prediction stored and retrievable for analysis.
+
+- Extensibility — ready for CI/CD and Kubernetes integration.
 
 ---
 ## Technologies Used :
@@ -319,6 +427,10 @@ The prediction is also stored automatically in the SQLite database.
 - [ ] Deploy to cloud (AWS/GCP/Azure)
 
 - [ ] Implement model registry with MLflow
+
+---
+## References : 
+- [Amazon review dataset](https://amazon-reviews-2023.github.io/)
 
 ---
 ## Author : 
