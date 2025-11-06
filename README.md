@@ -154,6 +154,99 @@ This will start:
 
 ---
 ## Usage
+
+### Configuration Overview
+
+The configuration file defines all parameters, paths, and settings that control the behavior of the Amazon Reviews Sentiment Analysis pipeline.
+It centralizes the logic for model training, data loading, evaluation, and web app visualization — making it easy to adjust the system without modifying core code
+
+🧠 Sentiment Mappings
+
+5-Class Sentiment Mapping
+```python
+SENTIMENT_MAPPING = {
+    0: "very negative",
+    1: "negative",
+    2: "neutral",
+    3: "positive",
+    4: "very positive"
+}
+```
+This mapping converts the model’s numeric predictions into human-readable sentiment labels, representing a fine-grained 5-level sentiment scale used for Amazon product reviews.
+
+📦 Dataset Configuration
+Dataset Paths
+```python
+DATASET_PATH = "Dataset/Gift_Cards.jsonl"
+```
+
+Main dataset used for fine-tuning and training.
+
+🤖 Model Configuration
+Model and Tokenizer
+```python
+TOKENIZER_NAME = "bert-base-uncased"
+MODEL_NAME = "bert-base-uncased"
+```
+
+Defines the Hugging Face pre-trained model and tokenizer.
+You may replace these with variants like "distilbert-base-uncased" for faster training or "roberta-base" for improved accuracy.
+
+Training Hyperparameters
+```python
+EPOCHS = 10
+N_CLASSES = 5
+DROPOUT = 0.3
+MAX_LEN = 128
+VAL_SIZE = 0.1
+TEST_SIZE = 0.1
+BATCH_SIZE = 16
+LEARNING_RATE = 1e-5
+```
+
+Parameter Summary:
+
+- EPOCHS — total training iterations.
+
+- N_CLASSES — number of sentiment categories (5 for this model).
+
+- DROPOUT — prevents overfitting by randomly deactivating neurons.
+
+- MAX_LEN — maximum tokenized text length.
+
+- BATCH_SIZE / LEARNING_RATE — control convergence speed and stability.
+
+- VAL_SIZE / TEST_SIZE — split ratios for validation and test sets.
+
+💡 You can adjust these settings depending on your GPU/CPU capacity.
+
+Device Auto-Selection
+```python
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+```
+
+Automatically selects GPU if available, otherwise uses CPU.
+
+💾 Output Directories
+```python
+MODEL_TRAINING_OUTPUT_DIR = "outputs/training_evaluation/training"
+MODEL_EVALUATION_OUTPUT_DIR = "outputs/training_evaluation/evaluation"
+```
+
+All trained models, metrics, confusion matrices, and plots are saved here.
+Each run automatically generates a timestamped folder, for example:
+```python
+outputs/training_evaluation/training/run_05-11-2025-14-30-10/
+```
+
+🔍 Inference Configuration
+```python
+PRETRAINED_MODEL_PATH = "outputs/training_evaluation/training/run_05-11-2025-14-30-10/best_model.pth"
+```
+
+Specifies the location of the trained model used during inference via the FastAPI backend.
+Update this path whenever you retrain or fine-tune a new model.
+
 ### FastAPI inference :
 
 You can send a prediction request directly:
