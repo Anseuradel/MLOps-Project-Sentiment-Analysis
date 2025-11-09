@@ -9,7 +9,7 @@ A comprehensive MLOps pipeline for sentiment analysis that demonstrates producti
 
 ---
 ## Table of Contents :
-- [Introduction](#Introdution)
+- [Introduction](@Introdution)
 - [Project Overview](#Project-Overview)
     - [Project Goals & Motivation](#Project-Goals-&-Motivation)
     - [Objective](#Objective)
@@ -18,7 +18,7 @@ A comprehensive MLOps pipeline for sentiment analysis that demonstrates producti
     - [Challenge & Solution](#Challenge-&-Solution)
 - [Repository Structure](#Repository-Structure)
 - [Installation & Setup](#Installation-&-Setup)
-- [Usage](#Usage)
+- [System Overview & Usage](#System-Overview-&-Usage)
     - [Configuration overview](#Configuration-Overview)
     - [Streamlit Dashboard](#Streamlit-Dashboard)
     - [Data Extraction & Processing](#Data-Extraction-&-Processing)
@@ -30,6 +30,16 @@ A comprehensive MLOps pipeline for sentiment analysis that demonstrates producti
 - [Future improvement](#Future-improvement)
 - [References](#References) 
 - [Author](#Author)  
+---
+
+## Introduction :
+
+Sentiment analysis is a core task in Natural Language Processing (NLP) that determines whether a piece of text conveys a positive, negative, or neutral emotion. In an era where businesses rely heavily on user-generated content, understanding customer opinions has become vital for decision-making, brand management, and product improvement.
+
+This project builds an end-to-end sentiment analysis pipeline using BERT, a state-of-the-art transformer-based model developed by Google. It automates the complete lifecycle — from data extraction and preprocessing, through model training and evaluation, to real-time inference and deployment.
+
+By combining PyTorch, FastAPI, Streamlit, and Docker, the system demonstrates how a machine learning model can be seamlessly integrated into a production-ready MLOps workflow. The project is designed to showcase technical depth, scalability, and reproducibility — essential qualities of modern AI engineering.
+
 ---
 
 ## Project Overview : 
@@ -91,6 +101,7 @@ Source: [Amazon review dataset](https://amazon-reviews-2023.github.io/)
 | Deployment                   | Containerized FastAPI + Streamlit with Docker Compose              |
 | Monitoring                   | SQLite database for prediction logging and Streamlit visualization |
 
+---
 
 ## Repository Structure : 
 
@@ -186,7 +197,7 @@ You’ll find three main tabs:
 - Prediction Logs — View historical predictions from SQLite
 
 ---
-## Usage
+## System Overview & Usage
 
 ### Configuration Overview
 
