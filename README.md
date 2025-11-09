@@ -9,7 +9,7 @@ A comprehensive MLOps pipeline for sentiment analysis that demonstrates producti
 
 ---
 ## Table of Contents :
-- [Introduction](#introdution)
+- [Introduction](#introduction)
 - [Project Overview](#project-overview)
     - [Project Goals & Motivation](#project-goals--motivation)
     - [Objective](#objective)
@@ -20,11 +20,10 @@ A comprehensive MLOps pipeline for sentiment analysis that demonstrates producti
 - [Installation & Setup](#installation--setup)
 - [System Overview & Usage](#system-overview--usage)
     - [Configuration overview](#configuration-overview)
-    - [Streamlit Dashboard](#streamlit-dashboard)
     - [Data Extraction & Processing](#data-extraction--processing)
     - [Model Training & Evaluation](#model-training--evaluation)
-    - [Docker & MLOps Pipeline](@docker--MLOps-pipeline)
-    - [FastAPI Inference](#fastAPI-inference)
+    - [FastAPI Inference](#FastAPI-inference)
+    - [Docker & MLOps Pipeline](#Docker--MLOps-Pipeline)
 - [Technologies Used](#technologies-used)
 - [Example workflow](#example-workflow)
 - [Future improvement](#future-improvement)
@@ -283,7 +282,7 @@ Each run automatically generates a timestamped folder, for example:
 outputs/training_evaluation/training/run_05-11-2025-14-30-10/
 ```
 
-####🔍 Inference Configuration
+#### Inference Configuration
 ```python
 PRETRAINED_MODEL_PATH = "outputs/training_evaluation/training/run_05-11-2025-14-30-10/best_model.pth"
 ```
@@ -376,7 +375,23 @@ Response Example :
 ```
 The prediction is also stored automatically in the SQLite database.
 
+Streamlit Dashboard
+
+- rovides a friendly UI for:
+
+    - Live predictions
+
+    - Viewing model metrics & evaluation plots
+
+    - Inspecting recent predictions from the SQLite database
+
+Tabs:
+1️⃣ Prediction — Enter text and get real-time sentiment.
+2️⃣ Model Info — Displays latest metrics and visualizations.
+3️⃣ Prediction Logs — Lists all previous predictions
+
 ### Docker & MLOps Pipeline
+
 #### Dockerized Architecture
 
 This project uses a multi-container setup managed by Docker Compose:
