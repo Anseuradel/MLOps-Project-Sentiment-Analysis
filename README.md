@@ -9,7 +9,7 @@ A comprehensive MLOps pipeline for sentiment analysis that demonstrates producti
 
 ---
 ## Table of Contents :
-- [Introduction](@Introdution)
+- [Introduction](##Introdution)
 - [Project Overview](#Project-Overview)
     - [Project Goals & Motivation](#Project-Goals-&-Motivation)
     - [Objective](#Objective)
