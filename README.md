@@ -9,27 +9,27 @@ A comprehensive MLOps pipeline for sentiment analysis that demonstrates producti
 
 ---
 ## Table of Contents :
-- [Introduction](##Introdution)
-- [Project Overview](#Project-Overview)
-    - [Project Goals & Motivation](#Project-Goals-&-Motivation)
-    - [Objective](#Objective)
-    - [Architecture Overview](#Architecture-Overview)
-    - [Data Source](#Data-Source)
-    - [Challenge & Solution](#Challenge-&-Solution)
-- [Repository Structure](#Repository-Structure)
-- [Installation & Setup](#Installation-&-Setup)
-- [System Overview & Usage](#System-Overview-&-Usage)
-    - [Configuration overview](#Configuration-Overview)
-    - [Streamlit Dashboard](#Streamlit-Dashboard)
-    - [Data Extraction & Processing](#Data-Extraction-&-Processing)
-    - [Model Training & Evaluation](#Model-Training-&-Evaluation)
-    - [Docker & MLOps Pipeline](@Docker-&-MLOps-Pipeline)
-    - [FastAPI Inference](#FastAPI-Inference)
-- [Technologies Used](#Technologies-Used)
-- [Example workflow](#Example-workflow)
-- [Future improvement](#Future-improvement)
-- [References](#References) 
-- [Author](#Author)  
+- [Introduction](##Introdution-:)
+- [Project Overview](#Project-Overview-:)
+    - [Project Goals & Motivation](#Project-Goals-&-Motivation-:)
+    - [Objective](#Objective-:)
+    - [Architecture Overview](#Architecture-Overview-:)
+    - [Data Source](#Data-Source-:)
+    - [Challenge & Solution](#Challenge-&-Solution-:)
+- [Repository Structure](#Repository-Structure-:)
+- [Installation & Setup](#Installation-&-Setup-:)
+- [System Overview & Usage](#System-Overview-&-Usage-:)
+    - [Configuration overview](#Configuration-Overview-:)
+    - [Streamlit Dashboard](#Streamlit-Dashboard-:)
+    - [Data Extraction & Processing](#Data-Extraction-&-Processing-:)
+    - [Model Training & Evaluation](#Model-Training-&-Evaluation-:)
+    - [Docker & MLOps Pipeline](@Docker-&-MLOps-Pipeline-:)
+    - [FastAPI Inference](#FastAPI-Inference-:)
+- [Technologies Used](#Technologies-Used-:)
+- [Example workflow](#Example-workflow-:)
+- [Future improvement](#Future-improvement-:)
+- [References](#References-:) 
+- [Author](#Author-:)  
 ---
 
 ## Introduction :
@@ -44,7 +44,7 @@ By combining PyTorch, FastAPI, Streamlit, and Docker, the system demonstrates ho
 
 ## Project Overview : 
 
-### Project Goals & Motivation
+### Project Goals & Motivation :
 
 This project serves as a portfolio piece that demonstrates:
 - **End-to-End Product Development**: From data extraction to visualization
@@ -52,7 +52,7 @@ This project serves as a portfolio piece that demonstrates:
 - **Technical Complexity**: Showcasing advanced MLOps skills for production deployment
 - **Practical Implementation**: Applying theoretical knowledge to build complete ML systems
 
-### Objective
+### Objective :
 
 Build a production-ready sentiment analysis system using BERT that:
 - Extracts real-world data from Play Store app reviews
@@ -68,9 +68,9 @@ Build a production-ready sentiment analysis system using BERT that:
 
 *Diagram created with [Excalidraw](https://excalidraw.com/)*
 
-### Data Source
+### Data Source :
 
-#### 🧪 Initial Approach (Abandoned)
+#### 🧪 Initial Approach (Abandoned) :
 
 - Scraped app reviews from the Google Play Store.
 
@@ -91,7 +91,7 @@ Build a production-ready sentiment analysis system using BERT that:
 Source: [Amazon review dataset](https://amazon-reviews-2023.github.io/)
 
 
-### Challenge & Solution
+### Challenge & Solution :
 
 | Challenge                    | Implemented Solution                                               |
 | ---------------------------- | ------------------------------------------------------------------ |
@@ -158,7 +158,7 @@ requirements.txt
 ```
 ---
 
-## Installation & Setup
+## Installation & Setup :
 
 1) Clone the repository
 ```Python
@@ -197,14 +197,14 @@ You’ll find three main tabs:
 - Prediction Logs — View historical predictions from SQLite
 
 ---
-## System Overview & Usage
+## System Overview & Usage :
 
-### Configuration Overview
+### Configuration Overview :
 
 The configuration file defines all parameters, paths, and settings that control the behavior of the Amazon Reviews Sentiment Analysis pipeline.
 It centralizes the logic for model training, data loading, evaluation, and web app visualization — making it easy to adjust the system without modifying core code
 
-#### 🧠 Sentiment Mappings
+#### Sentiment Mappings :
 
 5-Class Sentiment Mapping
 ```python
@@ -218,7 +218,7 @@ SENTIMENT_MAPPING = {
 ```
 This mapping converts the model’s numeric predictions into human-readable sentiment labels, representing a fine-grained 5-level sentiment scale used for Amazon product reviews.
 
-#### 📦 Dataset Configuration
+#### Dataset Configuration :
 Dataset Paths
 ```python
 DATASET_PATH = "Dataset/Gift_Cards.jsonl"
@@ -226,7 +226,7 @@ DATASET_PATH = "Dataset/Gift_Cards.jsonl"
 
 Main dataset used for fine-tuning and training.
 
-#### 🤖 Model Configuration
+#### Model Configuration :
 Model and Tokenizer
 ```python
 TOKENIZER_NAME = "bert-base-uncased"
@@ -271,7 +271,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 Automatically selects GPU if available, otherwise uses CPU.
 
-#### 💾 Output Directories
+#### Output Directories :
 ```python
 MODEL_TRAINING_OUTPUT_DIR = "outputs/training_evaluation/training"
 MODEL_EVALUATION_OUTPUT_DIR = "outputs/training_evaluation/evaluation"
@@ -283,7 +283,7 @@ Each run automatically generates a timestamped folder, for example:
 outputs/training_evaluation/training/run_05-11-2025-14-30-10/
 ```
 
-####🔍 Inference Configuration
+####🔍 Inference Configuration :
 ```python
 PRETRAINED_MODEL_PATH = "outputs/training_evaluation/training/run_05-11-2025-14-30-10/best_model.pth"
 ```
@@ -291,7 +291,7 @@ PRETRAINED_MODEL_PATH = "outputs/training_evaluation/training/run_05-11-2025-14-
 Specifies the location of the trained model used during inference via the FastAPI backend.
 Update this path whenever you retrain or fine-tune a new model.
 
-### Data Extraction & Processing
+### Data Extraction & Processing :
 1️⃣ Data Extraction
 
 - Loads the Amazon Reviews JSONL dataset from the specified path (Dataset/Gift_Cards.jsonl).
@@ -325,7 +325,7 @@ Truncate/pad sequences to MAX_LEN = 128
 
 - Supports chunk-based loading to handle massive datasets efficiently.
 
-### Model Training & Evaluation
+### Model Training & Evaluation :
 
 #### Model :
 
@@ -376,7 +376,7 @@ Response Example :
 ```
 The prediction is also stored automatically in the SQLite database.
 
-### Docker & MLOps Pipeline
+### Docker & MLOps Pipeline :
 #### Dockerized Architecture :
 
 This project uses a multi-container setup managed by Docker Compose:
