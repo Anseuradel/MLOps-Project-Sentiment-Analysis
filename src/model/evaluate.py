@@ -176,24 +176,24 @@ def evaluate_and_plot(
           2. Precision, recall, and F1-score bar chart (saved as `classification_report.png`)
           3. Histogram of prediction confidence scores (saved as `confidence_histogram.png`)
     """
-    # ✅ Evaluate Model
+    # Evaluate Model
     avg_loss, accuracy, y_true, y_pred, confidences = evaluate(
         model, data_loader, loss_fn, device
     )
 
-    # ✅ Create timestamped folder for this training run
+    # Create timestamped folder for this training run
     timestamp = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
     run_dir = os.path.join(run_folder, f"run_{timestamp}")
     os.makedirs(run_dir, exist_ok=True)
 
-    # ✅ Save Metrics to File
+    # Save Metrics to File
     metrics_path = os.path.join(run_dir, "metrics.txt")
     with open(metrics_path, "w") as f:
         f.write(f"Validation Loss: {avg_loss:.4f}\n")
         f.write(f"Validation Accuracy: {accuracy:.4f}\n")
     print(f"📄 Saved Metrics: {metrics_path}\n")
 
-    # ✅ Generate & Save Plots
+    # Generate & Save Plots
     plot_confusion_matrix(
         y_true, y_pred, class_names, os.path.join(run_dir, "confusion_matrix.png")
     )
