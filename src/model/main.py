@@ -18,18 +18,42 @@ from huggingface_hub import hf_hub_download
 # ------------------------------------------
 
 def get_last_chunk_state(state_file="last_chunk.txt"):
-    """Return the last processed chunk index from file."""
+    """
+    Read the last processed chunk index from a state file.
+    This enables resumable training across multiple chunks of data.
+    
+    Args:
+        state_file (str): Path to the state tracking file
+        
+    Returns:
+        int: Last processed chunk index, or -1 if no chunks processed yet
+    """
     if os.path.exists(state_file):
         with open(state_file, "r") as f:
             return int(f.read().strip())
     return -1  # means no chunk processed yet
 
 def update_last_chunk_state(chunk_idx, state_file="last_chunk.txt"):
-    """Update the state file with the last processed chunk index."""
+    """
+    Update the state file with the last processed chunk index.
+    
+    Args:
+        chunk_idx (int): Index of the chunk that was just processed
+        state_file (str): Path to the state tracking file
+    """
     with open(state_file, "w") as f:
         f.write(str(chunk_idx))
 
 def dataloader_train_test_val(df):
+    """
+    Create a DataLoader for the given DataFrame.
+    
+    Args:
+        df (pandas.DataFrame): DataFrame containing text and label data
+        
+    Returns:
+        DataLoader: PyTorch DataLoader ready for training/evaluation
+    """
     tokenizer = AutoTokenizer.from_pretrained(config.TOKENIZER_NAME)
     
     # change use_weighted_sampler to false to stop using weighted sampler 
@@ -46,6 +70,11 @@ def dataloader_train_test_val(df):
 # ------------------------------------------
 
 def main():
+    """
+    Main training pipeline that processes data in chunks, trains the model,
+    and evaluates performance. Supports resumable training and model loading
+    from both local storage and Hugging Face Hub.
+    """
     print("Loading dataset...\n")
 
     # Load dataset
