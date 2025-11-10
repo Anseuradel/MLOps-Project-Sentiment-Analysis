@@ -38,7 +38,18 @@ def train_epoch(
     device: torch.device,
 ):
     """
-    Trains the model for one epoch.
+    Trains the model for one complete epoch.
+    
+    Args:
+        model: The sentiment classifier model to train
+        data_loader: DataLoader providing training batches
+        loss_fn: Loss function for computing training loss
+        optimizer: Optimizer for updating model parameters
+        scheduler: Learning rate scheduler
+        device: Device to train on (CPU/GPU)
+        
+    Returns:
+        Tuple[float, float]: Average loss and accuracy for the epoch
     """
     model.train()
     total_loss, correct_predictions, total_samples = 0, 0, 0
@@ -99,6 +110,24 @@ def train_model(
     lr: float = 2e-5,
     run_folder: str = MODEL_TRAINING_OUTPUT_DIR,
 ):
+"""
+    Main training function that handles the complete training loop.
+    Includes class weighting, learning rate scheduling, model checkpointing,
+    and Hugging Face Hub integration.
+    
+    Args:
+        model: The sentiment classifier model to train
+        train_loader: DataLoader for training data
+        val_loader: DataLoader for validation data
+        device: Device to train on (CPU/GPU)
+        epochs: Number of training epochs
+        lr: Learning rate for optimizer
+        run_folder: Directory to save training outputs
+        
+    Returns:
+        SentimentClassifier: The trained model
+    """
+    # Ensure model is on the correct device
     model = model.to(device)
 
     #  Compute class weights based on training dataset
@@ -205,6 +234,11 @@ def train_model(
 def plot_training_results(history: Dict[str, List[float]], run_dir: str):
     """
     Plots the training & validation accuracy and loss curves.
+    Saves the plots to the specified directory.
+    
+    Args:
+        history: Dictionary containing training history metrics
+        run_dir: Directory to save the generated plots
     """
     epochs = range(1, len(history["train_loss"]) + 1)
 
