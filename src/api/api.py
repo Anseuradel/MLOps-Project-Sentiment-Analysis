@@ -61,7 +61,15 @@ model = None
 tokenizer = None  # only used for real model path
 
 def try_load_real_model():
-    """Attempt to download model file from HF or use local path, then load weights."""
+    """
+    Attempt to download model file from Hugging Face Hub or use local path, then load weights.
+    
+    Returns:
+        SentimentClassifier: Loaded and configured model ready for inference
+        
+    Raises:
+        FileNotFoundError: If model cannot be found locally or downloaded from HF Hub
+    """
     model_file_path = None
     logger.info(f"Attempting to download {MODEL_FILE} from HF repo {MODEL_REPO} ...")
 
@@ -140,9 +148,11 @@ else:
 # Request / Response Models
 # ------------------------------------------------------------------------------
 class PredictionRequest(BaseModel):
+    """Request schema for prediction endpoint."""
     text: str
 
 class PredictionResponse(BaseModel):
+    """Response schema for prediction endpoint with comprehensive results."""
     text: str
     prediction: int
     prediction_label: str
@@ -171,14 +181,28 @@ LABELS = DEFAULT_LABELS[:NUM_CLASSES] if len(DEFAULT_LABELS) >= NUM_CLASSES else
 # ------------------------------------------------------------------------------
 @app.get("/health")
 async def health_check():
+    """Health check endpoint for load balancers and monitoring."""
     return {"status": "healthy"}
 
 @app.get("/metrics")
 async def metrics():
+    """Prometheus metrics endpoint for monitoring."""
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(request: PredictionRequest):
+    """
+    Main prediction endpoint for sentiment analysis.
+    
+    Args:
+        request: PredictionRequest containing text to analyze
+        
+    Returns:
+        PredictionResponse with sentiment prediction and metadata
+        
+    Raises:
+        HTTPException: If prediction fails
+    """
     start_time = time()
     try:
         prediction_counter.inc()
@@ -261,6 +285,7 @@ async def predict(request: PredictionRequest):
 
 @app.post("/predict_debug")
 async def predict_debug(request: Request):
+    """Debug endpoint to inspect raw request data."""
     raw_body = await request.body()
     return {"raw_body": raw_body.decode(), "headers": dict(request.headers)}
 
@@ -273,7 +298,10 @@ class ReloadRequest(BaseModel):
 @app.post("/reload_model")
 async def reload_model(req: ReloadRequest):
     """
-    Dynamically reload either the MockSentimentClassifier or the real model without restarting the container.
+    Dynamically reload either the MockSentimentClassifier or the real model 
+    without restarting the container.
+    
+    This allows runtime switching between mock and real models for testing.
     """
     global model, USE_MOCK, tokenizer
 
