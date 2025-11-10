@@ -13,7 +13,15 @@ logger = logging.getLogger(__name__)
 os.makedirs(DB_DIR, exist_ok=True)
 
 def init_db():
-    """Initialize database and create tables if not exists."""
+    """
+    Initialize the SQLite database and create the predictions table if it doesn't exist.
+    
+    This function is called automatically when the module is imported to ensure
+    the database is ready for operations.
+    
+    Raises:
+        Exception: If database creation fails, logs error but doesn't crash the app
+    """
     try:
         logger.info(f"Initializing database at {DB_PATH}")
         conn = sqlite3.connect(DB_PATH)
@@ -37,7 +45,23 @@ def init_db():
         logger.error(f"Failed to initialize DB: {e}")
 
 def insert_prediction(input_text, predicted_label, confidence, model_version, model_type, latency_ms):
-    """Insert a new prediction record."""
+    """
+    Insert a new prediction record into the database.
+    
+    This function logs all prediction requests for analytics, monitoring,
+    and debugging purposes.
+    
+    Args:
+        input_text (str): The original text submitted for prediction
+        predicted_label (str): The predicted sentiment label
+        confidence (float): Model's confidence score (0.0 to 1.0)
+        model_version (str): Version identifier of the model
+        model_type (str): Type of model used ("MockSentimentClassifier" or "SentimentClassifier")
+        latency_ms (float): Total processing time in milliseconds
+        
+    Note:
+        This function uses UTC timestamp for consistent timezone handling
+    """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
@@ -56,7 +80,20 @@ def insert_prediction(input_text, predicted_label, confidence, model_version, mo
     conn.close()
 
 def fetch_recent_predictions(limit=10):
-    """Fetch most recent prediction logs."""
+    """
+    Fetch the most recent prediction logs from the database.
+    
+    This function is used by the Streamlit dashboard to display
+    recent prediction history to users.
+    
+    Args:
+        limit (int): Maximum number of records to return (default: 10)
+        
+    Returns:
+        list: List of tuples containing prediction records, ordered by most recent first
+              Each tuple contains: (timestamp, input_text, predicted_label, confidence, 
+                                  model_version, model_type, latency_ms)
+    """
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
