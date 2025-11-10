@@ -10,9 +10,19 @@ import regex
 from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer
 
+# Initialize the tokenizer from Hugging Face transformers
 tokenizer = AutoTokenizer.from_pretrained(config.TOKENIZER_NAME)
 
 def clean_text(text):
+    """
+    Cleans and preprocesses text data by performing several normalization steps.
+    
+    Args:
+        text (str): Input text to clean
+        
+    Returns:
+        str: Cleaned and normalized text
+    """
     text = text.lower()                                # lowercase
     text = re.sub(r"http\S+|www\S+|https\S+", '', text) # remove URLs
     text = re.sub(r"\W", " ", text)                     # remove punctuation
@@ -23,6 +33,19 @@ def clean_text(text):
 
 
 def tokenize_texts(texts, max_length):
+    """
+    Tokenizes a list of texts using the pre-trained tokenizer.
+    Converts text to format suitable for transformer models.
+    
+    Args:
+        texts (list): List of text strings to tokenize
+        max_length (int): Maximum sequence length for truncation/padding
+        
+    Returns:
+        dict: Dictionary containing tokenized outputs:
+              - input_ids: Token IDs representing the text
+              - attention_mask: Mask indicating which tokens to attend to
+    """
   
   tokenized = tokenizer(
         texts, padding=True, truncation=True, max_length=max_length, return_tensors="pt"
@@ -35,6 +58,18 @@ def tokenize_texts(texts, max_length):
    }
 
 def preprocess_data(df, test_size, max_length):
+    """
+    Main preprocessing pipeline that cleans, tokenizes, and splits the data.
+    
+    Args:
+        df (pandas.DataFrame): Input DataFrame with 'text' and 'label_id' columns
+        test_size (float): Proportion of data to use for validation (0.0-1.0)
+        max_length (int): Maximum sequence length for tokenization
+        
+    Returns:
+        tuple: (train_df, val_df) - Training and validation DataFrames
+    """
+
   # Ensure content column is cleaned
     df["text"] = df["text"].apply(clean_text)
 
