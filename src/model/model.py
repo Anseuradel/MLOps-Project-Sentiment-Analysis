@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import config
+import numpy as np
 
 from transformers import BertModel
 
@@ -8,8 +9,8 @@ from transformers import BertModel
 class SentimentClassifier(nn.Module):
     """
     Sentiment Classification Model using BERT as a feature extractor.
+    This model uses BERT to generate text representations and adds a classification head.
     """
-
     def __init__(
         self,
         n_classes: int,
@@ -21,8 +22,8 @@ class SentimentClassifier(nn.Module):
 
         Args:
             n_classes (int): Number of output classes (e.g., 5 for sentiment classification).
-            model_name (str): Pretrained BERT model name.
-            dropout_prob (float): Dropout probability for regularization.
+            model_name (str): Pretrained BERT model name from Hugging Face.
+            dropout_prob (float): Dropout probability for regularization to prevent overfitting.
         """
         super(SentimentClassifier, self).__init__()
         self.bert = BertModel.from_pretrained(model_name)
@@ -32,7 +33,7 @@ class SentimentClassifier(nn.Module):
     # def forward(
     #     self, input_ids: torch.Tensor, attention_mask: torch.Tensor
     # ) -> torch.Tensor:
-    #     """
+    #      """
     #     Forward pass through the model. This method defines how data flows through our model.
 
     #     Args:
@@ -56,6 +57,17 @@ class SentimentClassifier(nn.Module):
 
     # Testing new forward function to solve "horrible"  prediction bias
     def forward(self, input_ids, attention_mask):
+        """
+        Enhanced forward pass with mean pooling to address prediction bias issues.
+        Uses mean pooling across all tokens instead of just the [CLS] token.
+
+        Args:
+            input_ids (torch.Tensor): Tokenized input IDs of shape [batch_size, seq_len]
+            attention_mask (torch.Tensor): Attention mask for padding tokens of shape [batch_size, seq_len]
+
+        Returns:
+            torch.Tensor: Logits (raw scores before softmax) of shape [batch_size, n_classes]
+        """
         outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
         last_hidden_state = outputs.last_hidden_state  # [batch, seq_len, hidden]
         
@@ -71,25 +83,57 @@ class SentimentClassifier(nn.Module):
 
 
 
-
-import numpy as np
-
 class MockSentimentClassifier:
+    """
+    Mock classifier for testing and development purposes.
+    Provides the same interface as the real classifier but returns random predictions.
+    Useful for testing pipelines without running actual model inference.
+    """
     def __init__(self, n_classes=5):
+        """
+        Initialize the mock classifier.
+        
+        Args:
+            n_classes (int): Number of output classes
+        """
         self.n_classes = n_classes
         self.labels = ["Horrible", "very negative", "negative", "neutral", "positive", "very positive"]
 
     def predict(self, texts):
-        """Return a random class index for each text."""
+        """
+        Generate random class predictions for input texts.
+        
+        Args:
+            texts (list): List of text strings to classify
+            
+        Returns:
+            list: Random class indices for each text
+        """
         return [np.random.randint(0, self.n_classes) for _ in texts]
 
     def predict_proba(self, texts):
-        """Return random but valid probability distributions."""
+        """
+        Generate random probability distributions for input texts.
+        
+        Args:
+            texts (list): List of text strings to classify
+            
+        Returns:
+            numpy.ndarray: Random probability distributions of shape [len(texts), n_classes]
+        """
         probs = np.random.rand(len(texts), self.n_classes)
         probs = probs / probs.sum(axis=1, keepdims=True)
         return probs
 
     def get_label(self, index):
-        """Return label string for an index."""
+        """
+        Get the label string for a given class index.
+        
+        Args:
+            index (int): Class index
+            
+        Returns:
+            str: Corresponding label string
+        """
         return self.labels[index]
 
