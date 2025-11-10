@@ -83,7 +83,15 @@ if st.button("Reload Model"):
 # Helper functions
 # -----------------------------
 def get_latest_output_folder(base_path="/app/outputs/training_evaluation/evaluation"):
-    """Return the most recent run folder inside container"""
+     """
+    Find the most recent evaluation output folder.
+    
+    Args:
+        base_path (str): Base directory containing evaluation run folders
+        
+    Returns:
+        str or None: Path to the latest folder, or None if no folders exist
+    """
     if not os.path.exists(base_path):
         return None
     folders = [f.path for f in os.scandir(base_path) if f.is_dir()]
@@ -93,7 +101,15 @@ def get_latest_output_folder(base_path="/app/outputs/training_evaluation/evaluat
     return latest_folder
 
 def load_metrics(output_folder):
-    """Load evaluation metrics from evaluation.json if exists"""
+    """
+    Load evaluation metrics from JSON file if it exists.
+    
+    Args:
+        output_folder (str): Path to the evaluation output folder
+        
+    Returns:
+        dict or None: Loaded metrics dictionary, or None if file doesn't exist
+    """
     metrics_file = os.path.join(output_folder, "evaluation.json")
     if os.path.exists(metrics_file):
         with open(metrics_file) as f:
@@ -101,7 +117,16 @@ def load_metrics(output_folder):
     return None
 
 def load_plot(output_folder, plot_name="accuracy_plot.png"):
-    """Load a plot image"""
+    """
+    Load a plot image from the output folder.
+    
+    Args:
+        output_folder (str): Path to the evaluation output folder
+        plot_name (str): Name of the plot file to load
+        
+    Returns:
+        Image or None: PIL Image object if file exists, None otherwise
+    """
     plot_path = os.path.join(output_folder, plot_name)
     if os.path.exists(plot_path):
         return Image.open(plot_path)
