@@ -47,15 +47,15 @@ def tokenize_texts(texts, max_length):
               - attention_mask: Mask indicating which tokens to attend to
     """
   
-  tokenized = tokenizer(
+    tokenized = tokenizer(
         texts, padding=True, truncation=True, max_length=max_length, return_tensors="pt"
         )
 
     # Convert PyTorch tensors to lists so they work with Pandas
-  return {
-     "input_ids": tokenized["input_ids"].tolist(),
-     "attention_mask": tokenized["attention_mask"].tolist(),
-   }
+    return {
+      "input_ids": tokenized["input_ids"].tolist(),
+      "attention_mask": tokenized["attention_mask"].tolist(),
+    }
 
 def preprocess_data(df, test_size, max_length):
     """
