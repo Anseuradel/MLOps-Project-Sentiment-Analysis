@@ -110,7 +110,7 @@ def train_model(
     lr: float = 2e-5,
     run_folder: str = MODEL_TRAINING_OUTPUT_DIR,
 ):
-"""
+    """
     Main training function that handles the complete training loop.
     Includes class weighting, learning rate scheduling, model checkpointing,
     and Hugging Face Hub integration.
