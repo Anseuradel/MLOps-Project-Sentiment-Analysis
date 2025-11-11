@@ -153,6 +153,10 @@ def train_model(
             for i, cls in enumerate(unique_classes):
                 full_weights[int(cls)] = class_weights[i]
             class_weights = full_weights
+
+        # Testing  Normalize & smooth
+        class_weights = np.clip(class_weights, 0.5, np.median(class_weights) * 3)
+        class_weights = class_weights / class_weights.sum()
         
         # Convert to tensor
         class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
