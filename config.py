@@ -35,7 +35,7 @@ DROPOUT = 0.3
 MAX_LEN = 64
 TEST_SIZE = 0.1
 VAL_SIZE = 0.1
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 LEARNING_RATE = 1e-5
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
