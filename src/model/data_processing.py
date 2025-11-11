@@ -49,7 +49,7 @@ def tokenize_texts(texts, max_length):
   
   tokenized = tokenizer(
         texts, padding=True, truncation=True, max_length=max_length, return_tensors="pt"
-    )
+        )
 
     # Convert PyTorch tensors to lists so they work with Pandas
   return {
