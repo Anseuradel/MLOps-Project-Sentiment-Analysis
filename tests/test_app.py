@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from src.api.app import app, model, try_load_real_model
+from src.api.api import app, model, try_load_real_model
 from unittest.mock import Mock, patch
 
 class TestApp:
