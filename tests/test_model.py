@@ -1,5 +1,6 @@
 import pytest
 import torch
+import numpy as np
 from src.model.model import SentimentClassifier, MockSentimentClassifier
 
 class TestModel:
@@ -39,10 +40,13 @@ class TestModel:
         assert len(predictions) == 2
         assert all(0 <= pred < 5 for pred in predictions)
         
-        # Test probabilities
+        # Test probabilities - fix the float/double issue
         probabilities = mock_model.predict_proba(texts)
         assert probabilities.shape == (2, 5)
-        assert torch.allclose(torch.tensor(probabilities.sum(axis=1)), torch.tensor([1.0, 1.0]))
+        
+        # Use numpy for comparison to avoid torch dtype issues
+        sums = probabilities.sum(axis=1)
+        assert np.allclose(sums, [1.0, 1.0], rtol=1e-5)
         
         # Test label mapping
         label = mock_model.get_label(0)
