@@ -5,6 +5,12 @@ import tempfile
 import os
 from unittest.mock import Mock
 
+import sys
+
+# Add the project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, project_root)
+
 @pytest.fixture
 def sample_dataframe():
     """Sample DataFrame for testing."""
