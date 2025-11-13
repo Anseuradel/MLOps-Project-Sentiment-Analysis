@@ -60,4 +60,10 @@ def balance_dataset_with_augmentation(df, text_col="text", label_col="label_text
     print(df_balanced[label_col].value_counts())
     print()
 
+    # ✅ Drop rows with missing labels (safety measure)
+    df_balanced = df_balanced.dropna(subset=["label_id", "label_text"]).reset_index(drop=True)
+
+    # ✅ Ensure label_id is integer
+    df_balanced["label_id"] = df_balanced["label_id"].astype(int)
+
     return df_balanced
