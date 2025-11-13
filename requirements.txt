@@ -26,6 +26,7 @@ prometheus-fastapi-instrumentator==5.11.1  # Instrumentation for FastAPI metrics
 joblib==1.3.2          # Better model serialization
 typing-extensions>=4.10.0  # Better type hints support
 anyio==4.2.0           # Improved async compatibility
+nlpaug>=1.1.11
 
 # Deep learning and Hugging Face support
 torch==2.6.0+cpu     # For deep learning model operations
