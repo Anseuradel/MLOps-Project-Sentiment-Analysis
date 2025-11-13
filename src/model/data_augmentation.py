@@ -1,54 +1,63 @@
-import nltk
-
-# ✅ Download both tagger versions to avoid the LookupError
-nltk.download('averaged_perceptron_tagger')
-nltk.download('averaged_perceptron_tagger_eng')
-nltk.download('wordnet')
-nltk.download('omw-1.4')
-
 import pandas as pd
 import nlpaug.augmenter.word as naw
+import nltk
 
+# Download required NLTK data
+nltk.download("wordnet")
+nltk.download("omw-1.4")
+nltk.download("averaged_perceptron_tagger")
+nltk.download("averaged_perceptron_tagger_eng")
 
-
-def balance_dataset_with_augmentation(df: pd.DataFrame, label_col: str = "label_text", text_col: str = "text"):
+def balance_dataset_with_augmentation(df, text_col="text", label_col="label_text"):
     """
-    Augment minority classes using nlpaug to balance dataset.
-
-    Args:
-        df (pd.DataFrame): The original dataset.
-        label_col (str): The column containing labels.
-        text_col (str): The column containing text.
-
-    Returns:
-        pd.DataFrame: Balanced dataset (original + augmented samples).
+    Balance dataset by oversampling minority classes with NLP augmentation.
     """
-    aug = naw.SynonymAug(aug_src='wordnet')
 
-    # Compute class distribution
+    aug = naw.SynonymAug(aug_src="wordnet")
+
     class_counts = df[label_col].value_counts()
     max_count = class_counts.max()
-    print(f"Class counts before augmentation:\n{class_counts}\n")
 
-    augmented_frames = []
+    print("Class counts before augmentation:")
+    print(class_counts)
+    print()
+
+    augmented_rows = []
+
+    # Loop through each class
     for label, count in class_counts.items():
-        df_class = df[df[label_col] == label]
         if count < max_count:
+            df_class = df[df[label_col] == label]
             needed = max_count - count
+            print(f"Augmenting class '{label}' with {needed} new samples...")
+
+            # Collect augmented examples
             augmented_texts = []
-            for text in df_class[text_col]:
-                new_samples = aug.augment(text, n=3)
-                augmented_texts.extend(new_samples)
-                if len(augmented_texts) >= needed:
-                    break
+            while len(augmented_texts) < needed:
+                # pick random samples from df_class
+                sample = df_class.sample(1, replace=True).iloc[0]
+                augmented_text = aug.augment(sample[text_col])
+                if isinstance(augmented_text, list):
+                    augmented_text = augmented_text[0]
+                augmented_texts.append(augmented_text)
 
-            df_aug = df_class.sample(n=needed, replace=True).copy()
-            df_aug[text_col] = augmented_texts[:needed]
-            augmented_frames.append(df_aug)
+            # Create new rows for the augmented samples
+            new_rows = pd.DataFrame({
+                text_col: augmented_texts[:needed],
+                label_col: [label] * needed
+            })
 
-    # Combine everything
-    df_augmented = pd.concat([df] + augmented_frames, ignore_index=True)
-    print(f"✅ Dataset balanced — total samples: {len(df_augmented)}")
-    print(df_augmented[label_col].value_counts())
+            augmented_rows.append(new_rows)
 
-    return df_augmented
+    # Merge everything together
+    if augmented_rows:
+        df_augmented = pd.concat(augmented_rows, ignore_index=True)
+        df_balanced = pd.concat([df, df_augmented], ignore_index=True)
+    else:
+        df_balanced = df.copy()
+
+    print("\n✅ Class counts after augmentation:")
+    print(df_balanced[label_col].value_counts())
+    print()
+
+    return df_balanced
