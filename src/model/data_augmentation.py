@@ -1,5 +1,14 @@
+import nltk
+
+# ✅ Download both tagger versions to avoid the LookupError
+nltk.download('averaged_perceptron_tagger')
+nltk.download('averaged_perceptron_tagger_eng')
+nltk.download('wordnet')
+nltk.download('omw-1.4')
+
 import pandas as pd
 import nlpaug.augmenter.word as naw
+
 
 
 def balance_dataset_with_augmentation(df: pd.DataFrame, label_col: str = "label_text", text_col: str = "text"):
