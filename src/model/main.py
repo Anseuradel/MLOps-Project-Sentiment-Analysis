@@ -13,6 +13,7 @@ from src.model.trainer import train_model
 from src.model.evaluate import evaluate_and_plot
 
 from huggingface_hub import hf_hub_download
+from src.model.data_augmentation import balance_dataset_with_augmentation
 # ------------------------------------------
 # Utility functions
 # ------------------------------------------
@@ -100,9 +101,13 @@ def main():
 
     print(f"Using chunk {next_chunk+1}/{n_chunks} with {len(data_chunk)} samples")
 
+    # 🪄 Augment before tokenization
+    df_balanced = balance_dataset_with_augmentation(data)
+    df_balanced.to_csv("data/processed/balanced_dataset.csv", index=False)
+
     # Split train/val/test
     train_data_raw, test_data_raw = train_test_split(
-        data_chunk, test_size=config.TEST_SIZE, random_state=42
+        df_balanced, test_size=config.TEST_SIZE, random_state=42
     )
     train_data, val_data = preprocess_data(
         train_data_raw, test_size=config.VAL_SIZE, max_length=config.MAX_LEN
