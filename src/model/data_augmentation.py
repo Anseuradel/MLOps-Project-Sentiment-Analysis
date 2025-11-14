@@ -64,7 +64,7 @@ def balance_dataset_with_augmentation(df, text_col="text", label_col="label_text
     df_balanced = df_balanced.dropna(subset=["label_id", "label_text"]).reset_index(drop=True)
 
     # ✅ Ensure label_id is integer
-    df_balanced["label_id"] = df_balanced["label_id"].astype(int)
+    df_balanced["label"] = df_balanced["label_id"].astype(int)
 
     df_augmented = df_augmented.dropna(subset=[text_col, label_col]).reset_index(drop=True)
 
