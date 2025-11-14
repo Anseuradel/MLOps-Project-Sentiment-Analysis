@@ -6,3 +6,10 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# model weights
+outputs/*.pth
+*.pth
+
+# temp file
+last_chunk.txt
