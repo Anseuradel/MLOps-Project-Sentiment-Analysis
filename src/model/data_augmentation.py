@@ -9,11 +9,6 @@ nltk.download("averaged_perceptron_tagger")
 nltk.download("averaged_perceptron_tagger_eng")
 
 def balance_dataset_with_augmentation(df, text_col="text", label_col="label_text"):
-    """
-    Balance dataset by oversampling minority classes with NLP augmentation.
-    Works with datasets containing columns: text, label
-    """
-
     aug = naw.SynonymAug(aug_src="wordnet")
 
     class_counts = df[label_col].value_counts()
@@ -29,15 +24,16 @@ def balance_dataset_with_augmentation(df, text_col="text", label_col="label_text
         if count < max_count:
             df_class = df[df[label_col] == label]
             needed = max_count - count
+
             print(f"Augmenting class '{label}' with {needed} new samples...")
 
             augmented_texts = []
             while len(augmented_texts) < needed:
                 sample = df_class.sample(1, replace=True).iloc[0]
-                aug_text = aug.augment(sample[text_col])
-                if isinstance(aug_text, list):
-                    aug_text = aug_text[0]
-                augmented_texts.append(aug_text)
+                augmented_text = aug.augment(sample[text_col])
+                if isinstance(augmented_text, list):
+                    augmented_text = augmented_text[0]
+                augmented_texts.append(augmented_text)
 
             new_rows = pd.DataFrame({
                 text_col: augmented_texts[:needed],
@@ -56,7 +52,8 @@ def balance_dataset_with_augmentation(df, text_col="text", label_col="label_text
     print(df_balanced[label_col].value_counts())
     print()
 
-    # Clean any accidental NaN rows
-    df_balanced = df_balanced.dropna(subset=[text_col, label_col]).reset_index(drop=True)
+    # Remove any rows with missing *label_col only*
+    df_balanced = df_balanced.dropna(subset=[label_col]).reset_index(drop=True)
 
     return df_balanced
+
