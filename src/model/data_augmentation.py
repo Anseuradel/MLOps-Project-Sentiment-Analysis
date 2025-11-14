@@ -8,7 +8,7 @@ nltk.download("omw-1.4")
 nltk.download("averaged_perceptron_tagger")
 nltk.download("averaged_perceptron_tagger_eng")
 
-def balance_dataset_with_augmentation(df, text_col="text", label_col="label"):
+def balance_dataset_with_augmentation(df, text_col="text", label_col="label_text"):
     """
     Balance dataset by oversampling minority classes with NLP augmentation.
     Works with datasets containing columns: text, label
