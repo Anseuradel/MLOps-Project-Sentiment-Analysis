@@ -17,9 +17,13 @@ sns.set_style("whitegrid")
 
 
 def load_real_data():
-    """Load your actual dataset."""
-    df = load_data(config.DATASET_PATH)
+    df = load_data(config.DATASET_PATH_BALANCED)
+
+    if "label_id" in df.columns and "label" not in df.columns:
+        df = df.rename(columns={"label_id": "label"})
+    
     return df
+
 
 
 def plot_class_distribution(df, output_dir='outputs/eda'):
