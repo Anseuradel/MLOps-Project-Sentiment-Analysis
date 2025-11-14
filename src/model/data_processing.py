@@ -86,6 +86,10 @@ def preprocess_data(df, test_size, max_length):
     else:
         stratify_param = df["label_id"]
 
+    ######## DEBUGGING ###################
+    df["label_id"] = df[label_col].astype("category").cat.codes
+    ######################################################
+    
     # Split data into training and validation sets
     train_df, val_df = train_test_split(
         df, test_size=test_size, stratify=stratify_param, random_state=42
