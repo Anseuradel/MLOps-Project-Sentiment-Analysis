@@ -57,42 +57,35 @@ def tokenize_texts(texts, max_length):
       "attention_mask": tokenized["attention_mask"].tolist(),
     }
 
-def preprocess_data(df, test_size, max_length):
+def preprocess_data(df, test_size, max_length, label_col="label_text"):
     """
-    Main preprocessing pipeline that cleans, tokenizes, and splits the data.
-    
-    Args:
-        df (pandas.DataFrame): Input DataFrame with 'text' and 'label_id' columns
-        test_size (float): Proportion of data to use for validation (0.0-1.0)
-        max_length (int): Maximum sequence length for tokenization
-        
-    Returns:
-        tuple: (train_df, val_df) - Training and validation DataFrames
+    Preprocess pipeline: clean text, tokenize, create label_id, split.
     """
 
-  # Ensure content column is cleaned
+    # Clean text
     df["text"] = df["text"].apply(clean_text)
 
-    # Tokenize the cleaned text
-    tokenized_data = tokenize_texts(df["text"].tolist(), max_length)
+    # Create numeric label_id BEFORE using stratify
+    df["label_id"] = df[label_col].astype("category").cat.codes
 
-    # Add tokenized columns back to the dataframe
-    df["input_ids"] = tokenized_data["input_ids"]
-    df["attention_mask"] = tokenized_data["attention_mask"]
+    # Tokenize
+    tokenized = tokenize_texts(df["text"].tolist(), max_length)
+    df["input_ids"] = tokenized["input_ids"]
+    df["attention_mask"] = tokenized["attention_mask"]
 
-    # Check if stratification is possible
+    # Determine if stratification is possible
     if df["label_id"].value_counts().min() < 2:
         stratify_param = None
     else:
         stratify_param = df["label_id"]
 
-    ######## DEBUGGING ###################
-    df["label_id"] = df[label_col].astype("category").cat.codes
-    ######################################################
-    
-    # Split data into training and validation sets
+    # Split
     train_df, val_df = train_test_split(
-        df, test_size=test_size, stratify=stratify_param, random_state=42
+        df,
+        test_size=test_size,
+        stratify=stratify_param,
+        random_state=42
     )
 
     return train_df, val_df
+
