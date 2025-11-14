@@ -112,7 +112,7 @@ def main():
         df_balanced, test_size=config.TEST_SIZE, random_state=42
     )
     train_data, val_data = preprocess_data(
-        train_data_raw, test_size=config.VAL_SIZE, max_length=config.MAX_LEN
+        train_data_raw, test_size=config.VAL_SIZE, max_length=config.MAX_LEN, label_col="label_text"
     )
 
     # Dataloaders
