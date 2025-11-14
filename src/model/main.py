@@ -14,6 +14,7 @@ from src.model.evaluate import evaluate_and_plot
 
 from huggingface_hub import hf_hub_download
 from src.model.data_augmentation import balance_dataset_with_augmentation
+
 # ------------------------------------------
 # Utility functions
 # ------------------------------------------
@@ -104,6 +105,7 @@ def main():
     # 🪄 Augment before tokenization
     df_balanced = balance_dataset_with_augmentation(data_chunk)
     df_balanced.to_csv("Dataset/balanced_dataset.csv", index=False)
+    df_balanced = pd.read_csv("Dataset/balanced_dataset.csv")
 
     # Split train/val/test
     train_data_raw, test_data_raw = train_test_split(
