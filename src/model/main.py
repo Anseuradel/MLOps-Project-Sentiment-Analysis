@@ -102,7 +102,7 @@ def main():
     print(f"Using chunk {next_chunk+1}/{n_chunks} with {len(data_chunk)} samples")
 
     # 🪄 Augment before tokenization
-    df_balanced = balance_dataset_with_augmentation(data)
+    df_balanced = balance_dataset_with_augmentation(data_chunk)
     df_balanced.to_csv("Dataset/balanced_dataset.csv", index=False)
 
     # Split train/val/test
