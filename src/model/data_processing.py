@@ -62,6 +62,15 @@ def preprocess_data(df, test_size, max_length, label_col="label_text"):
     Preprocess pipeline: clean text, tokenize, create label_id, split.
     """
 
+    # --- Safety check: ensure label_id exists ---
+    if "label_id" not in df.columns:
+        raise ValueError("❌ preprocess_data: 'label_id' column missing — augmentation must create it!")
+
+    # --- Safety check: ensure no NaNs in label_id ---
+    if df["label_id"].isna().any():
+        print("⚠ Found NaN label_id, dropping them...")
+        df = df.dropna(subset=["label_id"]).reset_index(drop=True)
+
     # Clean text
     df["text"] = df["text"].apply(clean_text)
 
