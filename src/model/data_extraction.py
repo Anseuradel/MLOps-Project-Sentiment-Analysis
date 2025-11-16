@@ -106,7 +106,21 @@ def load_data(file_path, merge_labels=True):
         df["label_text"] = df["label_id"].map(SENTIMENT_MAPPING)
         df = df[["text", "label_id", "label_text"]]
 
+    # else:
+    #     raise ValueError("Dataset must contain either ('rating', 'text') or ('text', 'label') columns.")
     else:
-        raise ValueError("Dataset must contain either ('rating', 'text') or ('text', 'label') columns.")
+        # New valid column formats
+        if "text" in df.columns and "label_text" in df.columns:
+            df = df.rename(columns={"label_text": "label"})
+            print("Detected format: text + label_text → renamed to text + label")
+            return df
+
+        if "text" in df.columns and "label_id" in df.columns:
+            df = df.rename(columns={"label_id": "label"})
+            print("Detected format: text + label_id → renamed to text + label")
+            return df
+
+        raise ValueError("Dataset must contain one of the following column pairs: "
+                        "('rating','text'), ('text','label'), ('text','label_text'), ('text','label_id').")
 
     return df
