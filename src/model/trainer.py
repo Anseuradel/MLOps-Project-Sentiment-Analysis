@@ -24,6 +24,7 @@ from config import MODEL_TRAINING_OUTPUT_DIR
 from huggingface_hub import HfApi, HfFolder, upload_file
 
 import numpy as np
+import pandas as pd
 import torch
 from sklearn.utils.class_weight import compute_class_weight
 
