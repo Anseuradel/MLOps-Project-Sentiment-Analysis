@@ -87,6 +87,11 @@ def main():
     # Load the full dataset from file
     data = load_data(config.DATASET_PATH, merge_labels=True)
 
+    # 🔍 NEW: Analyze class imbalance before processing
+    print("🔍 Analyzing class imbalance...")
+    imbalance_ratio = analyze_imbalance_solutions(data)
+    print(f"📊 Dataset imbalance ratio: {imbalance_ratio:.2f}\n")
+
     # Configure chunk-based processing for large datasets
     # Process data in chunks to handle memory constraints or enable incremental learning
     CHUNK_FRAC = 0.9  # Fraction of data to use per chunk (90%)
@@ -120,9 +125,9 @@ def main():
     )
 
     # Create DataLoaders for training, validation, and testing
-    train_data = dataloader_train_test_val(train_data)
-    val_data = dataloader_train_test_val(val_data)
-    test_data = dataloader_train_test_val(test_data_raw)
+    train_data_loader = dataloader_train_test_val(train_data)
+    val_data_loader = dataloader_train_test_val(val_data)
+    test_data_loader = dataloader_train_test_val(test_data_raw)
 
     # Model initialization with fallback loading strategy
     model = SentimentClassifier(n_classes=config.N_CLASSES).to(config.DEVICE)
@@ -160,8 +165,8 @@ def main():
     print("Training model with imbalance handling...\n")
     trained_model = train_model_with_imbalance_handling(
         model=model,
-        train_loader=train_loader,
-        val_loader=val_loader,
+        train_loader=train_data_loader,
+        val_loader=val_data_loader,
         device=config.DEVICE,
         df_train=train_data_raw,  # Pass training data for class weight calculation
         epochs=config.EPOCHS,
@@ -184,16 +189,16 @@ def main():
     
     # Use the enhanced evaluation
     macro_f1, weighted_f1 = evaluate_imbalanced_model(
-        trained_model, test_loader, config.DEVICE
+        trained_model, test_data_loader, config.DEVICE
     )
     
-    print(f"🎯 Final Test Scores:")
-    print(f"   Macro F1: {macro_f1:.4f}")
-    print(f"   Weighted F1: {weighted_f1:.4f}")
+    print(f" Final Test Scores:")
+    print(f" Macro F1: {macro_f1:.4f}")
+    print(f" Weighted F1: {weighted_f1:.4f}")
     
     evaluate_and_plot(
         trained_model,
-        test_data,
+        test_data_loader,
         torch.nn.CrossEntropyLoss(),
         config.DEVICE,
         class_names=list(sentiment_mapper.values()),

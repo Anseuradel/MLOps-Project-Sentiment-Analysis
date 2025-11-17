@@ -145,7 +145,7 @@ def train_model(
         
         # Convert numpy weights to PyTorch tensor and move to device
         class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
-        print(f"🧮 Using class weights: {class_weights}")
+        print(f"Using class weights: {class_weights}")
         
         # Initialize loss function with class weights for imbalanced data
         loss_fn = nn.CrossEntropyLoss(weight=class_weights)
@@ -203,7 +203,7 @@ def train_model(
         # Save model checkpoint if it achieves best validation accuracy
         if val_acc > best_val_acc:
             torch.save(model.state_dict(), best_model_path)
-            print(f"✨ New best model saved locally: {best_model_path}\n")
+            print(f"New best model saved locally: {best_model_path}\n")
             best_val_acc = val_acc
 
     # --- Push final best model to Hugging Face Hub ---
@@ -215,15 +215,15 @@ def train_model(
             repo_id=repo_id,
             token=HfFolder.get_token()
         )
-        print(f"✅ Final best model uploaded to Hugging Face Hub: {repo_id}/best_model.pth")
+        print(f"Final best model uploaded to Hugging Face Hub: {repo_id}/best_model.pth")
     except Exception as e:
-        print(f"⚠️ Failed to push model to Hugging Face Hub: {e}")
+        print(f"Failed to push model to Hugging Face Hub: {e}")
 
     # Save training history as JSON for later analysis
     history_path = os.path.join(run_dir, "training_history.json")
     with open(history_path, "w") as f:
         json.dump(history, f, indent=4)
-    print(f"📄 Saved Training History: {history_path}\n")
+    print(f"Saved Training History: {history_path}\n")
 
     # Generate and save training plots
     plot_training_results(history, run_dir)
@@ -265,7 +265,7 @@ def get_class_weights(df, label_column='label_id'):
         y=labels
     )
     
-    print("🎯 Class weights computed:", class_weights)
+    print("Class weights computed:", class_weights)
     return torch.tensor(class_weights, dtype=torch.float)
 
 def evaluate_imbalanced_model(model, test_loader, device):
@@ -290,10 +290,10 @@ def evaluate_imbalanced_model(model, test_loader, device):
     macro_f1 = f1_score(all_labels, all_preds, average='macro')
     weighted_f1 = f1_score(all_labels, all_preds, average='weighted')
     
-    print(f"📊 Imbalance-Aware Evaluation:")
+    print(f"Imbalance-Aware Evaluation:")
     print(f"   Macro F1: {macro_f1:.4f}")
     print(f"   Weighted F1: {weighted_f1:.4f}")
-    print("\n📋 Classification Report:")
+    print("\n Classification Report:")
     print(classification_report(all_labels, all_preds, 
                               target_names=['Very Negative', 'Negative', 'Neutral', 'Positive', 'Very Positive']))
     
@@ -316,20 +316,20 @@ def train_model_with_imbalance_handling(
     if use_class_weights:
         class_weights = get_class_weights(df_train, label_column='label_id')
         class_weights = class_weights.to(device)
-        print(f"🎯 Using class weights: {class_weights}")
+        print(f"Using class weights: {class_weights}")
     else:
         class_weights = None
     
     # 2. Choose loss function
     if use_focal_loss and use_class_weights:
         loss_fn = FocalLoss(alpha=class_weights, gamma=2.0)
-        print("🎯 Using Focal Loss with class weights")
+        print("Using Focal Loss with class weights")
     elif use_class_weights:
         loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights)
-        print("🎯 Using Weighted CrossEntropy Loss")
+        print("Using Weighted CrossEntropy Loss")
     else:
         loss_fn = torch.nn.CrossEntropyLoss()
-        print("🎯 Using Standard CrossEntropy Loss")
+        print("Using Standard CrossEntropy Loss")
     
     # 3. Setup optimizer and scheduler (same as before)
     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
@@ -359,7 +359,7 @@ def train_model_with_imbalance_handling(
             model, train_loader, loss_fn, optimizer, scheduler, device
         )
         
-        # 🎯 NEW: Validate with F1 scores instead of accuracy
+        # NEW: Validate with F1 scores instead of accuracy
         val_macro_f1, val_weighted_f1 = evaluate_imbalanced_model(model, val_loader, device)
 
         print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.4f}")
@@ -374,14 +374,14 @@ def train_model_with_imbalance_handling(
         # Save best model based on macro F1
         if val_macro_f1 > best_val_f1:
             torch.save(model.state_dict(), best_model_path)
-            print(f"✨ New best model saved (F1: {val_macro_f1:.4f}): {best_model_path}\n")
+            print(f"New best model saved (F1: {val_macro_f1:.4f}): {best_model_path}\n")
             best_val_f1 = val_macro_f1
 
     # Save training history
     history_path = os.path.join(run_dir, "training_history.json")
     with open(history_path, "w") as f:
         json.dump(history, f, indent=4)
-    print(f"📄 Saved Training History: {history_path}\n")
+    print(f"Saved Training History: {history_path}\n")
 
     # Plot training results
     plot_training_results(history, run_dir)
@@ -402,7 +402,7 @@ def plot_training_results(history: Dict[str, List[float]], run_dir: str):
     # Create figure with two subplots
     plt.figure(figsize=(12, 5))
     
-    # ✅ Plot 1: Training and validation loss
+    # Plot 1: Training and validation loss
     plt.subplot(1, 2, 1)
     plt.plot(epochs, history["train_loss"], label="Train Loss", marker="o")
     plt.plot(epochs, history["val_loss"], label="Val Loss", marker="o")
@@ -412,7 +412,7 @@ def plot_training_results(history: Dict[str, List[float]], run_dir: str):
     plt.legend()
     plt.grid()
 
-    # ✅ Plot 2: Training and validation accuracy
+    # Plot 2: Training and validation accuracy
     plt.subplot(1, 2, 2)
     plt.plot(epochs, history["train_acc"], label="Train Accuracy", marker="o")
     plt.plot(epochs, history["val_acc"], label="Val Accuracy", marker="o")
@@ -422,8 +422,8 @@ def plot_training_results(history: Dict[str, List[float]], run_dir: str):
     plt.legend()
     plt.grid()
 
-    # ✅ Save plots to file
+    # Save plots to file
     accuracy_and_loss_plot_path = os.path.join(run_dir, "accuracy_and_loss_plot.png")
     plt.savefig(accuracy_and_loss_plot_path)
 
-    print(f"📊 Saved Accuracy and Loss Plot: {accuracy_and_loss_plot_path}\n")
+    print(f"Saved Accuracy and Loss Plot: {accuracy_and_loss_plot_path}\n")
