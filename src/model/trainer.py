@@ -230,12 +230,80 @@ def train_model(
     return model
 
 
+from sklearn.metrics import f1_score, classification_report
+
+class FocalLoss(torch.nn.Module):
+    """Focal Loss for handling class imbalance."""
+    def __init__(self, alpha=None, gamma=2.0, reduction='mean'):
+        super(FocalLoss, self).__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduction = reduction
+
+    def forward(self, inputs, targets):
+        ce_loss = torch.nn.functional.cross_entropy(inputs, targets, reduction='none')
+        pt = torch.exp(-ce_loss)
+        focal_loss = (1 - pt) ** self.gamma * ce_loss
+        
+        if self.alpha is not None:
+            focal_loss = self.alpha[targets] * focal_loss
+            
+        if self.reduction == 'mean':
+            return focal_loss.mean()
+        elif self.reduction == 'sum':
+            return focal_loss.sum()
+        else:
+            return focal_loss
+
+def get_class_weights(df, label_column='label_id'):
+    """Compute class weights for imbalanced dataset."""
+    labels = df[label_column].values
+    class_weights = compute_class_weight(
+        class_weight='balanced',
+        classes=np.unique(labels),
+        y=labels
+    )
+    
+    print("🎯 Class weights computed:", class_weights)
+    return torch.tensor(class_weights, dtype=torch.float)
+
+def evaluate_imbalanced_model(model, test_loader, device):
+    """Evaluate model with imbalanced-aware metrics."""
+    model.eval()
+    all_preds = []
+    all_labels = []
+    
+    with torch.no_grad():
+        for batch in test_loader:
+            inputs = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+            labels = batch['labels'].to(device)
+            
+            outputs = model(inputs, attention_mask)
+            preds = torch.argmax(outputs, dim=1)
+            
+            all_preds.extend(preds.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+    
+    # Use macro F1 instead of accuracy for imbalanced data
+    macro_f1 = f1_score(all_labels, all_preds, average='macro')
+    weighted_f1 = f1_score(all_labels, all_preds, average='weighted')
+    
+    print(f"📊 Imbalance-Aware Evaluation:")
+    print(f"   Macro F1: {macro_f1:.4f}")
+    print(f"   Weighted F1: {weighted_f1:.4f}")
+    print("\n📋 Classification Report:")
+    print(classification_report(all_labels, all_preds, 
+                              target_names=['Very Negative', 'Negative', 'Neutral', 'Positive', 'Very Positive']))
+    
+    return macro_f1, weighted_f1
+
 def train_model_with_imbalance_handling(
     model: SentimentClassifier,
     train_loader: DataLoader,
     val_loader: DataLoader,
     device: torch.device,
-    df_train: pd.DataFrame,  # Add training dataframe for class weights
+    df_train: pd.DataFrame,
     epochs: int = 3,
     lr: float = 2e-5,
     use_focal_loss: bool = True,
@@ -243,15 +311,10 @@ def train_model_with_imbalance_handling(
 ):
     """Enhanced training with imbalance handling."""
     
-    # 1. Compute class weights
+    # 1. Compute class weights from training data
     if use_class_weights:
-        labels = df_train['label_id'].values
-        class_weights = compute_class_weight(
-            class_weight='balanced',
-            classes=np.unique(labels),
-            y=labels
-        )
-        class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
+        class_weights = get_class_weights(df_train, label_column='label_id')
+        class_weights = class_weights.to(device)
         print(f"🎯 Using class weights: {class_weights}")
     else:
         class_weights = None
@@ -267,7 +330,7 @@ def train_model_with_imbalance_handling(
         loss_fn = torch.nn.CrossEntropyLoss()
         print("🎯 Using Standard CrossEntropy Loss")
     
-    # Rest of training code remains the same...
+    # 3. Setup optimizer and scheduler (same as before)
     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
     scheduler = get_scheduler(
         "linear",
@@ -275,44 +338,54 @@ def train_model_with_imbalance_handling(
         num_warmup_steps=0,
         num_training_steps=len(train_loader) * epochs,
     )
-    
-    # Training loop with imbalance-aware evaluation
+
+    # Create timestamped folder for this training run
+    timestamp = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
+    run_dir = os.path.join(MODEL_TRAINING_OUTPUT_DIR, f"run_{timestamp}")
+    os.makedirs(run_dir, exist_ok=True)
+
+    best_val_f1 = 0  # Track F1 instead of accuracy
+    best_model_path = os.path.join("outputs", "best_model.pth")
+    history = {"train_loss": [], "train_acc": [], "val_macro_f1": [], "val_weighted_f1": []}
+
+    # 4. Training loop with imbalance-aware validation
     for epoch in range(epochs):
+        print(f"Epoch {epoch + 1}/{epochs}")
+        print(f"{'-' * 10}")
+
+        # Train epoch (same as before)
         train_loss, train_acc = train_epoch(
             model, train_loader, loss_fn, optimizer, scheduler, device
         )
         
-        # Use macro F1 for validation
+        # 🎯 NEW: Validate with F1 scores instead of accuracy
         val_macro_f1, val_weighted_f1 = evaluate_imbalanced_model(model, val_loader, device)
-        
-        print(f"Epoch {epoch+1}/{epochs}")
-        print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}")
-        print(f"Val Macro F1: {val_macro_f1:.4f}, Val Weighted F1: {val_weighted_f1:.4f}")
 
-    # --- Push final best model to Hugging Face Hub ---
-    try:
-        repo_id = "Adelanseur/MLOps-Project"
-        upload_file(
-            path_or_fileobj=best_model_path,
-            path_in_repo="best_model.pth",  # overwrite same file
-            repo_id=repo_id,
-            token=HfFolder.get_token()
-        )
-        print(f"✅ Final best model uploaded to Hugging Face Hub: {repo_id}/best_model.pth")
-    except Exception as e:
-        print(f"⚠️ Failed to push model to Hugging Face Hub: {e}")
+        print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.4f}")
+        print(f"Val Macro F1: {val_macro_f1:.4f}, Val Weighted F1: {val_weighted_f1:.4f}\n")
 
-    # Save training history as JSON for later analysis
+        # Save metrics
+        history["train_loss"].append(train_loss)
+        history["train_acc"].append(train_acc)
+        history["val_macro_f1"].append(val_macro_f1)
+        history["val_weighted_f1"].append(val_weighted_f1)
+
+        # Save best model based on macro F1
+        if val_macro_f1 > best_val_f1:
+            torch.save(model.state_dict(), best_model_path)
+            print(f"✨ New best model saved (F1: {val_macro_f1:.4f}): {best_model_path}\n")
+            best_val_f1 = val_macro_f1
+
+    # Save training history
     history_path = os.path.join(run_dir, "training_history.json")
     with open(history_path, "w") as f:
         json.dump(history, f, indent=4)
     print(f"📄 Saved Training History: {history_path}\n")
 
-    # Generate and save training plots
+    # Plot training results
     plot_training_results(history, run_dir)
 
     return model
-
 
 def plot_training_results(history: Dict[str, List[float]], run_dir: str):
     """
