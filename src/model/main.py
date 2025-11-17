@@ -122,7 +122,7 @@ def main():
     # Create DataLoaders for training, validation, and testing
     train_data = dataloader_train_test_val(train_data)
     val_data = dataloader_train_test_val(val_data)
-    test_data = dataloader_test_val(test_data_raw)
+    test_data = dataloader_train_test_val(test_data_raw)
 
     # Model initialization with fallback loading strategy
     model = SentimentClassifier(n_classes=config.N_CLASSES).to(config.DEVICE)
