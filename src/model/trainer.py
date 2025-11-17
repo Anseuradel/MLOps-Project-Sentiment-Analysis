@@ -230,6 +230,90 @@ def train_model(
     return model
 
 
+def train_model_with_imbalance_handling(
+    model: SentimentClassifier,
+    train_loader: DataLoader,
+    val_loader: DataLoader,
+    device: torch.device,
+    df_train: pd.DataFrame,  # Add training dataframe for class weights
+    epochs: int = 3,
+    lr: float = 2e-5,
+    use_focal_loss: bool = True,
+    use_class_weights: bool = True
+):
+    """Enhanced training with imbalance handling."""
+    
+    # 1. Compute class weights
+    if use_class_weights:
+        labels = df_train['label_id'].values
+        class_weights = compute_class_weight(
+            class_weight='balanced',
+            classes=np.unique(labels),
+            y=labels
+        )
+        class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
+        print(f"🎯 Using class weights: {class_weights}")
+    else:
+        class_weights = None
+    
+    # 2. Choose loss function
+    if use_focal_loss and use_class_weights:
+        loss_fn = FocalLoss(alpha=class_weights, gamma=2.0)
+        print("🎯 Using Focal Loss with class weights")
+    elif use_class_weights:
+        loss_fn = torch.nn.CrossEntropyLoss(weight=class_weights)
+        print("🎯 Using Weighted CrossEntropy Loss")
+    else:
+        loss_fn = torch.nn.CrossEntropyLoss()
+        print("🎯 Using Standard CrossEntropy Loss")
+    
+    # Rest of training code remains the same...
+    optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
+    scheduler = get_scheduler(
+        "linear",
+        optimizer=optimizer,
+        num_warmup_steps=0,
+        num_training_steps=len(train_loader) * epochs,
+    )
+    
+    # Training loop with imbalance-aware evaluation
+    for epoch in range(epochs):
+        train_loss, train_acc = train_epoch(
+            model, train_loader, loss_fn, optimizer, scheduler, device
+        )
+        
+        # Use macro F1 for validation
+        val_macro_f1, val_weighted_f1 = evaluate_imbalanced_model(model, val_loader, device)
+        
+        print(f"Epoch {epoch+1}/{epochs}")
+        print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}")
+        print(f"Val Macro F1: {val_macro_f1:.4f}, Val Weighted F1: {val_weighted_f1:.4f}")
+
+    # --- Push final best model to Hugging Face Hub ---
+    try:
+        repo_id = "Adelanseur/MLOps-Project"
+        upload_file(
+            path_or_fileobj=best_model_path,
+            path_in_repo="best_model.pth",  # overwrite same file
+            repo_id=repo_id,
+            token=HfFolder.get_token()
+        )
+        print(f"✅ Final best model uploaded to Hugging Face Hub: {repo_id}/best_model.pth")
+    except Exception as e:
+        print(f"⚠️ Failed to push model to Hugging Face Hub: {e}")
+
+    # Save training history as JSON for later analysis
+    history_path = os.path.join(run_dir, "training_history.json")
+    with open(history_path, "w") as f:
+        json.dump(history, f, indent=4)
+    print(f"📄 Saved Training History: {history_path}\n")
+
+    # Generate and save training plots
+    plot_training_results(history, run_dir)
+
+    return model
+
+
 def plot_training_results(history: Dict[str, List[float]], run_dir: str):
     """
     Plots the training & validation accuracy and loss curves.
