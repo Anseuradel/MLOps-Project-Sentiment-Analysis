@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 import matplotlib
 
+# Set matplotlib backend to Agg for non-interactive plotting (useful for servers)
 matplotlib.use("Agg")
 
 from tqdm import tqdm
@@ -15,7 +16,6 @@ from transformers import get_scheduler
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from sklearn.utils.class_weight import compute_class_weight
-
 
 from src.model.evaluate import evaluate
 from src.model.model import SentimentClassifier
@@ -28,7 +28,6 @@ import torch
 from sklearn.utils.class_weight import compute_class_weight
 
 
-
 def train_epoch(
     model: SentimentClassifier,
     data_loader: DataLoader,
@@ -36,7 +35,7 @@ def train_epoch(
     optimizer: AdamW,
     scheduler: torch.optim.lr_scheduler.LambdaLR,
     device: torch.device,
-):
+) -> Tuple[float, float]:
     """
     Trains the model for one complete epoch.
     
@@ -51,6 +50,7 @@ def train_epoch(
     Returns:
         Tuple[float, float]: Average loss and accuracy for the epoch
     """
+    # Set model to training mode (enables dropout, batch norm updates, etc.)
     model.train()
     total_loss, correct_predictions, total_samples = 0, 0, 0
 
@@ -61,45 +61,32 @@ def train_epoch(
         attention_mask = batch["attention_mask"].to(device)
         labels = batch["labels"].to(device)
 
+        # Clear gradients from previous iteration
         optimizer.zero_grad()
-        # Runs the model
+        
+        # Runs the model forward pass
         outputs = model(input_ids=input_ids, attention_mask=attention_mask)
         
         # Computes loss (how wrong the predictions are)
         loss = loss_fn(outputs, labels)
 
-        # Computes gradient
+        # Computes gradients via backpropagation
         loss.backward()
 
-        # Updates model weigths
+        # Updates model weights using computed gradients
         optimizer.step()
+        
+        # Updates learning rate according to scheduler
         scheduler.step()
 
+        # Accumulate metrics for epoch statistics
         total_loss += loss.item()
         correct_predictions += (outputs.argmax(dim=1) == labels).sum().item()
         total_samples += labels.size(0)
 
+    # Return average loss and accuracy for the epoch
     return total_loss / len(data_loader), correct_predictions / total_samples
 
-
-# def train_model(
-#     model: SentimentClassifier,
-#     train_loader: DataLoader,
-#     val_loader: DataLoader,
-#     device: torch.device,
-#     epochs: int = 3,
-#     lr: float = 2e-5,
-#     run_folder: str = MODEL_TRAINING_OUTPUT_DIR,
-# ):
-#     model = model.to(device)
-#     loss_fn = nn.CrossEntropyLoss()
-#     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
-#     scheduler = get_scheduler(
-#         "linear",
-#         optimizer=optimizer,
-#         num_warmup_steps=0,
-#         num_training_steps=len(train_loader) * epochs,
-#     )
 
 def train_model(
     model: SentimentClassifier,
@@ -109,7 +96,7 @@ def train_model(
     epochs: int = 3,
     lr: float = 2e-5,
     run_folder: str = MODEL_TRAINING_OUTPUT_DIR,
-):
+) -> SentimentClassifier:
     """
     Main training function that handles the complete training loop.
     Includes class weighting, learning rate scheduling, model checkpointing,
@@ -130,22 +117,23 @@ def train_model(
     # Ensure model is on the correct device
     model = model.to(device)
 
-    #  Compute class weights based on training dataset
+    # Compute class weights based on training dataset to handle class imbalance
     labels = train_loader.dataset.labels if hasattr(train_loader.dataset, "labels") else None
     if labels is not None:
         
-        # Convert labels to a flat numpy array
+        # Convert labels to a flat numpy array for weight computation
         labels = np.array(train_loader.dataset.labels)
         unique_classes = np.unique(labels)
         
-        # 🧮 Compute class weights safely
+        # Compute class weights using sklearn's balanced method
+        # This gives higher weight to underrepresented classes
         class_weights = compute_class_weight(
             class_weight="balanced",
             classes=unique_classes,
             y=labels
         )
         
-        # 🛠 Ensure all expected classes (e.g. 0–5) are present
+        # Handle case where current chunk doesn't contain all expected classes
         num_classes = model.fc.out_features if hasattr(model, "fc") else len(unique_classes)
         if len(unique_classes) < num_classes:
             print(f"⚠️ Missing some classes in current chunk — filling weights to {num_classes}.")
@@ -153,24 +141,22 @@ def train_model(
             for i, cls in enumerate(unique_classes):
                 full_weights[int(cls)] = class_weights[i]
             class_weights = full_weights
-
-        # Testing  Normalize & smooth
-        class_weights = np.clip(class_weights, 0.5, np.median(class_weights) * 3)
-        class_weights = class_weights / class_weights.sum()
         
-        # Convert to tensor
+        # Convert numpy weights to PyTorch tensor and move to device
         class_weights = torch.tensor(class_weights, dtype=torch.float).to(device)
         print(f"🧮 Using class weights: {class_weights}")
-        loss_fn = nn.CrossEntropyLoss(weight=class_weights)
-                                
         
-        print(f" Using class weights: {class_weights}")
+        # Initialize loss function with class weights for imbalanced data
         loss_fn = nn.CrossEntropyLoss(weight=class_weights)
     else:
+        # Fallback to unweighted loss if labels aren't available
         print(" Could not find dataset labels, using unweighted CrossEntropyLoss.")
         loss_fn = nn.CrossEntropyLoss()
 
+    # Initialize optimizer with weight decay for regularization
     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=1e-2)
+    
+    # Initialize learning rate scheduler with linear decay
     scheduler = get_scheduler(
         "linear",
         optimizer=optimizer,
@@ -178,40 +164,48 @@ def train_model(
         num_training_steps=len(train_loader) * epochs,
     )
 
-    # Create timestamped folder for this training run
+    # Create timestamped folder for this training run for organization
     timestamp = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
     run_dir = os.path.join(run_folder, f"run_{timestamp}")
     os.makedirs(run_dir, exist_ok=True)
 
+    # Track best validation accuracy for model checkpointing
     best_val_acc = 0
     best_model_path = os.path.join("outputs", "best_model.pth")
+    
+    # Initialize history dictionary to track training progress
     history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
 
+    # Main training loop over epochs
     for epoch in range(epochs):
         print(f"Epoch {epoch + 1}/{epochs}")
         print(f"{'-' * 10}")
 
+        # Train for one epoch and get metrics
         train_loss, train_acc = train_epoch(
             model, train_loader, loss_fn, optimizer, scheduler, device
         )
+        
+        # Evaluate on validation set
         val_loss, val_acc, _, _, _ = evaluate(model, val_loader, loss_fn, device)
 
+        # Print epoch results
         print(f"Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.4f}")
         print(f"Val   Loss: {val_loss:.4f}, Val   Accuracy: {val_acc:.4f}\n")
 
-        # Save metrics for plotting
+        # Save metrics for plotting and analysis
         history["train_loss"].append(train_loss)
         history["train_acc"].append(train_acc)
         history["val_loss"].append(val_loss)
         history["val_acc"].append(val_acc)
 
-        # Save locally if it's the best so far
+        # Save model checkpoint if it achieves best validation accuracy
         if val_acc > best_val_acc:
             torch.save(model.state_dict(), best_model_path)
             print(f"✨ New best model saved locally: {best_model_path}\n")
             best_val_acc = val_acc
 
-    # --- Push once, at the end of training ---
+    # --- Push final best model to Hugging Face Hub ---
     try:
         repo_id = "Adelanseur/MLOps-Project"
         upload_file(
@@ -224,12 +218,13 @@ def train_model(
     except Exception as e:
         print(f"⚠️ Failed to push model to Hugging Face Hub: {e}")
 
-    # Save training history as JSON
+    # Save training history as JSON for later analysis
     history_path = os.path.join(run_dir, "training_history.json")
     with open(history_path, "w") as f:
         json.dump(history, f, indent=4)
     print(f"📄 Saved Training History: {history_path}\n")
 
+    # Generate and save training plots
     plot_training_results(history, run_dir)
 
     return model
@@ -246,8 +241,10 @@ def plot_training_results(history: Dict[str, List[float]], run_dir: str):
     """
     epochs = range(1, len(history["train_loss"]) + 1)
 
-    # ✅ Plot loss
+    # Create figure with two subplots
     plt.figure(figsize=(12, 5))
+    
+    # ✅ Plot 1: Training and validation loss
     plt.subplot(1, 2, 1)
     plt.plot(epochs, history["train_loss"], label="Train Loss", marker="o")
     plt.plot(epochs, history["val_loss"], label="Val Loss", marker="o")
@@ -257,7 +254,7 @@ def plot_training_results(history: Dict[str, List[float]], run_dir: str):
     plt.legend()
     plt.grid()
 
-    # ✅ Plot accuracy
+    # ✅ Plot 2: Training and validation accuracy
     plt.subplot(1, 2, 2)
     plt.plot(epochs, history["train_acc"], label="Train Accuracy", marker="o")
     plt.plot(epochs, history["val_acc"], label="Val Accuracy", marker="o")
@@ -267,9 +264,8 @@ def plot_training_results(history: Dict[str, List[float]], run_dir: str):
     plt.legend()
     plt.grid()
 
-    # ✅ Save plots
+    # ✅ Save plots to file
     accuracy_and_loss_plot_path = os.path.join(run_dir, "accuracy_and_loss_plot.png")
-
     plt.savefig(accuracy_and_loss_plot_path)
 
     print(f"📊 Saved Accuracy and Loss Plot: {accuracy_and_loss_plot_path}\n")

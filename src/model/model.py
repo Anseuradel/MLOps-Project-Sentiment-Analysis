@@ -11,6 +11,7 @@ class SentimentClassifier(nn.Module):
     Sentiment Classification Model using BERT as a feature extractor.
     This model uses BERT to generate text representations and adds a classification head.
     """
+
     def __init__(
         self,
         n_classes: int,
@@ -26,14 +27,20 @@ class SentimentClassifier(nn.Module):
             dropout_prob (float): Dropout probability for regularization to prevent overfitting.
         """
         super(SentimentClassifier, self).__init__()
+        # Load pre-trained BERT model for feature extraction
         self.bert = BertModel.from_pretrained(model_name)
+        # Dropout layer for regularization
         self.dropout = nn.Dropout(p=dropout_prob)
+        # Final fully connected layer for classification
+        # Input size: BERT hidden size (e.g., 768 for bert-base-uncased)
+        # Output size: number of sentiment classes
         self.fc = nn.Linear(self.bert.config.hidden_size, n_classes)
 
+    # Original forward function (commented out for reference)
     # def forward(
     #     self, input_ids: torch.Tensor, attention_mask: torch.Tensor
     # ) -> torch.Tensor:
-    #      """
+    #     """
     #     Forward pass through the model. This method defines how data flows through our model.
 
     #     Args:
@@ -55,7 +62,7 @@ class SentimentClassifier(nn.Module):
     #     # 4. Pass through final linear layer to get logits
     #     return self.fc(dropped_output)
 
-    # Testing new forward function to solve "horrible"  prediction bias
+    # Enhanced forward function to solve "horrible" prediction bias
     def forward(self, input_ids, attention_mask):
         """
         Enhanced forward pass with mean pooling to address prediction bias issues.
@@ -68,19 +75,29 @@ class SentimentClassifier(nn.Module):
         Returns:
             torch.Tensor: Logits (raw scores before softmax) of shape [batch_size, n_classes]
         """
+        # Get BERT outputs - last_hidden_state contains representations for all tokens
         outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
-        last_hidden_state = outputs.last_hidden_state  # [batch, seq_len, hidden]
+        last_hidden_state = outputs.last_hidden_state  # Shape: [batch, seq_len, hidden_size]
         
-        # Mean pooling (ignoring padding tokens)
+        # Mean pooling: average token representations while ignoring padding tokens
+        # Expand attention mask to match hidden state dimensions [batch, seq_len, hidden_size]
         mask = attention_mask.unsqueeze(-1).expand(last_hidden_state.size()).float()
-        masked_sum = torch.sum(last_hidden_state * mask, dim=1)
-        mask_sum = torch.clamp(mask.sum(dim=1), min=1e-9)
-        mean_pooled = masked_sum / mask_sum
+        
+        # Sum the hidden states, but only for non-padding tokens (where mask == 1)
+        masked_sum = torch.sum(last_hidden_state * mask, dim=1)  # Sum along sequence length
+        
+        # Count how many non-padding tokens we have for each sequence
+        mask_sum = torch.clamp(mask.sum(dim=1), min=1e-9)  # Avoid division by zero
+        
+        # Compute mean by dividing sum by count of non-padding tokens
+        mean_pooled = masked_sum / mask_sum  # Shape: [batch, hidden_size]
     
+        # Apply dropout for regularization
         dropped_output = self.dropout(mean_pooled)
+        
+        # Final classification layer to get logits
         logits = self.fc(dropped_output)
         return logits
-
 
 
 class MockSentimentClassifier:
@@ -89,6 +106,7 @@ class MockSentimentClassifier:
     Provides the same interface as the real classifier but returns random predictions.
     Useful for testing pipelines without running actual model inference.
     """
+    
     def __init__(self, n_classes=5):
         """
         Initialize the mock classifier.
@@ -97,6 +115,7 @@ class MockSentimentClassifier:
             n_classes (int): Number of output classes
         """
         self.n_classes = n_classes
+        # Define mock sentiment labels (note: 6 labels for 5 classes - may need adjustment)
         self.labels = ["Horrible", "very negative", "negative", "neutral", "positive", "very positive"]
 
     def predict(self, texts):
@@ -121,8 +140,9 @@ class MockSentimentClassifier:
         Returns:
             numpy.ndarray: Random probability distributions of shape [len(texts), n_classes]
         """
+        # Generate random numbers and normalize to get valid probability distributions
         probs = np.random.rand(len(texts), self.n_classes)
-        probs = probs / probs.sum(axis=1, keepdims=True)
+        probs = probs / probs.sum(axis=1, keepdims=True)  # Normalize each row to sum to 1
         return probs
 
     def get_label(self, index):
@@ -136,4 +156,3 @@ class MockSentimentClassifier:
             str: Corresponding label string
         """
         return self.labels[index]
-

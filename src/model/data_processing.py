@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 from transformers import AutoTokenizer
 
 # Initialize the tokenizer from Hugging Face transformers
+# Uses the tokenizer name specified in config file (e.g., 'bert-base-uncased')
 tokenizer = AutoTokenizer.from_pretrained(config.TOKENIZER_NAME)
 
 def clean_text(text):
@@ -23,12 +24,27 @@ def clean_text(text):
     Returns:
         str: Cleaned and normalized text
     """
-    text = text.lower()                                # lowercase
-    text = re.sub(r"http\S+|www\S+|https\S+", '', text) # remove URLs
-    text = re.sub(r"\W", " ", text)                     # remove punctuation
-    text = re.sub(r"\s+", " ", text)                    # remove extra spaces
-    text = regex.compile(r'\p{Emoji}').sub('', text)  # remove emoticones
+    # Convert to lowercase for consistency
+    text = text.lower()
+    
+    # Remove URLs (http, https, www links)
+    text = re.sub(r"http\S+|www\S+|https\S+", '', text)
+    
+    # Remove punctuation and special characters
+    # \W matches any non-word character (equivalent to [^a-zA-Z0-9_])
+    text = re.sub(r"\W", " ", text)
+    
+    # Remove extra whitespace (multiple spaces, tabs, newlines)
+    # Replace with single space
+    text = re.sub(r"\s+", " ", text)
+    
+    # Remove emojis using regex with unicode property support
+    # \p{Emoji} matches any emoji character
+    text = regex.compile(r'\p{Emoji}').sub('', text)
+    
+    # Optional: Remove stopwords (commented out for flexibility)
     # text = " ".join([word for word in text.split() if word not in stop_words])
+    
     return text
 
 
@@ -46,55 +62,59 @@ def tokenize_texts(texts, max_length):
               - input_ids: Token IDs representing the text
               - attention_mask: Mask indicating which tokens to attend to
     """
-  
+    # Tokenize the texts with appropriate parameters for model input
     tokenized = tokenizer(
-        texts, padding=True, truncation=True, max_length=max_length, return_tensors="pt"
-        )
+        texts, 
+        padding=True,           # Pad sequences to same length
+        truncation=True,        # Truncate sequences longer than max_length
+        max_length=max_length,  # Maximum sequence length
+        return_tensors="pt"     # Return PyTorch tensors
+    )
 
-    # Convert PyTorch tensors to lists so they work with Pandas
+    # Convert PyTorch tensors to lists for compatibility with Pandas DataFrames
     return {
-      "input_ids": tokenized["input_ids"].tolist(),
-      "attention_mask": tokenized["attention_mask"].tolist(),
+        "input_ids": tokenized["input_ids"].tolist(),
+        "attention_mask": tokenized["attention_mask"].tolist(),
     }
 
-def preprocess_data(df, test_size, max_length, label_col="label_text"):
+
+def preprocess_data(df, test_size, max_length):
     """
-    Preprocess pipeline: clean text, tokenize, create label_id, split.
+    Main preprocessing pipeline that cleans, tokenizes, and splits the data.
+    
+    Args:
+        df (pandas.DataFrame): Input DataFrame with 'text' and 'label_id' columns
+        test_size (float): Proportion of data to use for validation (0.0-1.0)
+        max_length (int): Maximum sequence length for tokenization
+        
+    Returns:
+        tuple: (train_df, val_df) - Training and validation DataFrames
     """
-
-    # --- Safety check: ensure label_id exists ---
-    if "label_id" not in df.columns:
-        raise ValueError("❌ preprocess_data: 'label_id' column missing — augmentation must create it!")
-
-    # --- Safety check: ensure no NaNs in label_id ---
-    if df["label_id"].isna().any():
-        print("⚠ Found NaN label_id, dropping them...")
-        df = df.dropna(subset=["label_id"]).reset_index(drop=True)
-
-    # Clean text
+    # Clean the text data by applying the clean_text function to each row
     df["text"] = df["text"].apply(clean_text)
 
-    # Create numeric label_id BEFORE using stratify
-    df["label_id"] = df[label_col].astype("category").cat.codes
+    # Tokenize the cleaned text data
+    tokenized_data = tokenize_texts(df["text"].tolist(), max_length)
 
-    # Tokenize
-    tokenized = tokenize_texts(df["text"].tolist(), max_length)
-    df["input_ids"] = tokenized["input_ids"]
-    df["attention_mask"] = tokenized["attention_mask"]
+    # Add tokenized columns back to the DataFrame
+    df["input_ids"] = tokenized_data["input_ids"]
+    df["attention_mask"] = tokenized_data["attention_mask"]
 
-    # Determine if stratification is possible
+    # Determine if stratified sampling is possible
+    # Stratification requires at least 2 samples per class in both splits
     if df["label_id"].value_counts().min() < 2:
+        # If any class has fewer than 2 samples, don't use stratification
         stratify_param = None
     else:
+        # Use label distribution for stratified sampling
         stratify_param = df["label_id"]
 
-    # Split
+    # Split data into training and validation sets
     train_df, val_df = train_test_split(
-        df,
-        test_size=test_size,
-        stratify=stratify_param,
-        random_state=42
+        df, 
+        test_size=test_size,      # Proportion for validation set
+        stratify=stratify_param,  # Maintain class distribution in splits
+        random_state=42           # Seed for reproducible splits
     )
 
     return train_df, val_df
-

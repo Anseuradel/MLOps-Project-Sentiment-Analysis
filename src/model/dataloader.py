@@ -12,6 +12,7 @@ class SentimentDataset(Dataset):
     A custom PyTorch Dataset for handling sentiment analysis data.
     This class handles tokenization and formatting of text data for transformer models.
     """
+    
     def __init__(self, reviews, labels, tokenizer, max_len=128):
         """
         Initialize the SentimentDataset.
@@ -49,26 +50,28 @@ class SentimentDataset(Dataset):
                 - attention_mask: Attention mask for the tokens
                 - labels: Target label for the sample
         """
+        # Ensure review is string type (handle potential NaN or non-string values)
         review = str(self.reviews[idx])  
+        # Convert label to integer
         label = int(self.labels[idx])     
 
+        # Tokenize the review text
         encoding = self.tokenizer.encode_plus(
             review,
-            add_special_tokens=True,
-            max_length=self.max_len,
-            return_token_type_ids=False,
-            padding="max_length",
-            truncation=True,
-            return_attention_mask=True,
-            return_tensors="pt"
+            add_special_tokens=True,    # Add [CLS] and [SEP] tokens
+            max_length=self.max_len,    # Truncate/pad to max length
+            return_token_type_ids=False, # Not needed for single-sequence tasks
+            padding="max_length",       # Pad all sequences to max_length
+            truncation=True,            # Truncate sequences longer than max_length
+            return_attention_mask=True, # Generate attention mask
+            return_tensors="pt"         # Return PyTorch tensors
         )
 
         return {
-            "input_ids": encoding["input_ids"].flatten(),
-            "attention_mask": encoding["attention_mask"].flatten(),
-            "labels": torch.tensor(label, dtype=torch.long)  
+            "input_ids": encoding["input_ids"].flatten(),        # Remove extra dimension: [1, seq_len] -> [seq_len]
+            "attention_mask": encoding["attention_mask"].flatten(),  # Same flattening for attention mask
+            "labels": torch.tensor(label, dtype=torch.long)      # Convert label to tensor with long dtype
         }
-
 
 
 def create_dataloader(df, tokenizer, max_len, batch_size):
@@ -84,66 +87,21 @@ def create_dataloader(df, tokenizer, max_len, batch_size):
     Returns:
         DataLoader: PyTorch DataLoader ready for training/inference
     """
-    #Convert labels to tensor
+    # Convert labels to PyTorch tensor
+    # Ensure labels are integers and convert to appropriate tensor format
     labels = torch.tensor(df["label_id"].astype(int).to_numpy(), dtype=torch.long)
 
+    # Create the custom dataset
     dataset = SentimentDataset(
-        reviews=df["text"].to_numpy(),
-        labels=labels,
-        tokenizer=tokenizer,
-        max_len=max_len,
+        reviews=df["text"].to_numpy(),  # Convert text column to numpy array
+        labels=labels,                  # Pre-converted labels tensor
+        tokenizer=tokenizer,            # Tokenizer for text processing
+        max_len=max_len,                # Maximum sequence length
     )
 
+    # Create and return the DataLoader
     return DataLoader(
         dataset,
-        batch_size=batch_size,
-        shuffle=True
-    ) 
-
-## this function is a dataloader that implements weighted sampler 
-
-# def create_dataloader(df, tokenizer, max_len, batch_size, use_weighted_sampler=True):
-#     """
-#     Create a DataLoader for the given dataframe.
-#     Optionally applies WeightedRandomSampler to handle class imbalance.
-#     """
-#     # Convert labels to tensor
-#     labels = torch.tensor(df["label_id"].astype(int).to_numpy(), dtype=torch.long)
-
-#     dataset = SentimentDataset(
-#         reviews=df["text"].to_numpy(),
-#         labels=labels,
-#         tokenizer=tokenizer,
-#         max_len=max_len,
-#     )
-
-#     if use_weighted_sampler:
-#         # Compute class frequencies
-#         class_counts = np.bincount(labels.numpy())
-#         class_weights = 1.0 / class_counts
-
-#         # Assign a weight to each sample
-#         sample_weights = class_weights[labels.numpy()]
-
-#         # Create the sampler
-#         sampler = WeightedRandomSampler(
-#             weights=torch.DoubleTensor(sample_weights),
-#             num_samples=len(sample_weights),
-#             replacement=True
-#         )
-
-#         # Use sampler instead of shuffle
-#         dataloader = DataLoader(
-#             dataset,
-#             batch_size=batch_size,
-#             sampler=sampler,
-#         )
-#     else:
-#         # Default: simple shuffled DataLoader
-#         dataloader = DataLoader(
-#             dataset,
-#             batch_size=batch_size,
-#             shuffle=True
-#         )
-
-#     return dataloader
+        batch_size=batch_size,  # Number of samples per batch
+        shuffle=True            # Shuffle data for training (set to False for validation/test)
+    )
