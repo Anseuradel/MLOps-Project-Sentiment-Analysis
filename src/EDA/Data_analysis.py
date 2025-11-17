@@ -230,6 +230,47 @@ RECOMMENDATIONS:
     print(f"🔤 Avg word count: {word_counts.mean():.1f} words")
     print("="*50)
 
+def analyze_imbalance_solutions(df, label_column='label_id'):
+    """Analyze and recommend imbalance solutions."""
+    class_counts = df[label_column].value_counts().sort_index()
+    total_samples = len(df)
+    
+    print("🔍 CLASS IMBALANCE ANALYSIS")
+    print("=" * 40)
+    
+    for class_id, count in class_counts.items():
+        percentage = (count / total_samples) * 100
+        print(f"Class {class_id}: {count:>6} samples ({percentage:5.1f}%)")
+    
+    imbalance_ratio = class_counts.max() / class_counts.min()
+    print(f"\n⚖️  Imbalance Ratio: {imbalance_ratio:.1f}")
+    
+    # Recommendations
+    print("\n🎯 RECOMMENDED SOLUTIONS:")
+    
+    if imbalance_ratio > 10:
+        print("✅ HIGH IMBALANCE (>10:1)")
+        print("   - Use SMOTE + Class Weights + Focal Loss")
+        print("   - Consider ensemble methods")
+        print("   - Use macro F1 for evaluation")
+    
+    elif imbalance_ratio > 5:
+        print("✅ MODERATE IMBALANCE (5-10:1)")
+        print("   - Use Class Weights + Focal Loss") 
+        print("   - Try random oversampling")
+        print("   - Monitor per-class performance")
+    
+    elif imbalance_ratio > 2:
+        print("✅ MILD IMBALANCE (2-5:1)")
+        print("   - Use Class Weights in loss function")
+        print("   - Consider focal loss with gamma=1")
+    
+    else:
+        print("✅ RELATIVELY BALANCED")
+        print("   - Standard training should work")
+    
+    return imbalance_ratio
+
 def main():
     """Run complete EDA analysis."""
     print("🚀 Starting Comprehensive EDA Analysis")
@@ -250,6 +291,7 @@ def main():
     plot_class_distribution(df, output_dir)
     plot_text_analysis(df, output_dir)
     generate_analysis_report(df, output_dir)
+    analyze_imbalance_solutions(df, output_dir)
     
     print("\n✅ EDA Analysis Complete!")
     print(f"📁 All outputs saved to: {output_dir}/")
