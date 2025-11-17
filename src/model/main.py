@@ -9,8 +9,10 @@ from src.model.data_extraction import load_data
 from src.model.data_processing import preprocess_data
 from src.model.dataloader import create_dataloader
 from src.model.model import SentimentClassifier
-from src.model.trainer import train_model
+# from src.model.trainer import train_model
+from src.model.trainer import train_model_with_imbalance_handling, evaluate_imbalanced_model
 from src.model.evaluate import evaluate_and_plot
+from src.EDA.Data_analysis import analyze_imbalance_solutions
 
 from huggingface_hub import hf_hub_download
 
@@ -149,17 +151,45 @@ def main():
             print("➡️ Starting training from scratch.")
 
     # Train the model on the current chunk
-    print("Training model...\n")
-    trained_model = train_model(
-        model, train_data, val_data, device=config.DEVICE, epochs=config.EPOCHS
+    # print("Training model...\n")
+    # trained_model = train_model(
+    #     model, train_data, val_data, device=config.DEVICE, epochs=config.EPOCHS
+    # )
+
+    # NEW: Train with imbalance handling
+    print("Training model with imbalance handling...\n")
+    trained_model = train_model_with_imbalance_handling(
+        model=model,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        device=config.DEVICE,
+        df_train=train_data_raw,  # Pass training data for class weight calculation
+        epochs=config.EPOCHS,
+        lr=config.LEARNING_RATE,  # Make sure this is in your config
+        use_focal_loss=True,      # Enable focal loss
+        use_class_weights=True    # Enable class weights
     )
 
+    
     # Update state to track progress (enables resumable training)
     update_last_chunk_state(next_chunk)
 
-    # Evaluate model performance on test set
-    print("Evaluating model...\n")
-    sentiment_mapper = (config.SENTIMENT_MAPPING)
+    # # Evaluate model performance on test set
+    # print("Evaluating model...\n")
+    # sentiment_mapper = (config.SENTIMENT_MAPPING)
+
+    # NEW: Evaluate with imbalance-aware metrics
+    print("Evaluating model with imbalance-aware metrics...\n")
+    sentiment_mapper = config.SENTIMENT_MAPPING
+    
+    # Use the enhanced evaluation
+    macro_f1, weighted_f1 = evaluate_imbalanced_model(
+        trained_model, test_loader, config.DEVICE
+    )
+    
+    print(f"🎯 Final Test Scores:")
+    print(f"   Macro F1: {macro_f1:.4f}")
+    print(f"   Weighted F1: {weighted_f1:.4f}")
     
     evaluate_and_plot(
         trained_model,
