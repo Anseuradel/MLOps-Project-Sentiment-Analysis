@@ -388,42 +388,128 @@ def train_model_with_imbalance_handling(
 
     return model
 
+# def plot_training_results(history: Dict[str, List[float]], run_dir: str):
+#     """
+#     Plots the training & validation accuracy and loss curves.
+#     Saves the plots to the specified directory.
+    
+#     Args:
+#         history: Dictionary containing training history metrics
+#         run_dir: Directory to save the generated plots
+#     """
+#     epochs = range(1, len(history["train_loss"]) + 1)
+
+#     # Create figure with two subplots
+#     plt.figure(figsize=(12, 5))
+    
+#     # Plot 1: Training and validation loss
+#     plt.subplot(1, 2, 1)
+#     plt.plot(epochs, history["train_loss"], label="Train Loss", marker="o")
+#     plt.plot(epochs, history["val_loss"], label="Val Loss", marker="o")
+#     plt.xlabel("Epochs")
+#     plt.ylabel("Loss")
+#     plt.title("Training & Validation Loss")
+#     plt.legend()
+#     plt.grid()
+
+#     # Plot 2: Training and validation accuracy
+#     plt.subplot(1, 2, 2)
+#     plt.plot(epochs, history["train_acc"], label="Train Accuracy", marker="o")
+#     plt.plot(epochs, history["val_acc"], label="Val Accuracy", marker="o")
+#     plt.xlabel("Epochs")
+#     plt.ylabel("Accuracy")
+#     plt.title("Training & Validation Accuracy")
+#     plt.legend()
+#     plt.grid()
+
+#     # Save plots to file
+#     accuracy_and_loss_plot_path = os.path.join(run_dir, "accuracy_and_loss_plot.png")
+#     plt.savefig(accuracy_and_loss_plot_path)
+
+#     print(f"Saved Accuracy and Loss Plot: {accuracy_and_loss_plot_path}\n")
+
+
 def plot_training_results(history: Dict[str, List[float]], run_dir: str):
     """
-    Plots the training & validation accuracy and loss curves.
-    Saves the plots to the specified directory.
-    
-    Args:
-        history: Dictionary containing training history metrics
-        run_dir: Directory to save the generated plots
+    Plots the training & validation metrics curves.
+    Updated for imbalance handling (F1 scores instead of loss/accuracy).
     """
     epochs = range(1, len(history["train_loss"]) + 1)
 
-    # Create figure with two subplots
-    plt.figure(figsize=(12, 5))
+    # Create figure with subplots
+    plt.figure(figsize=(15, 10))
     
     # Plot 1: Training and validation loss
-    plt.subplot(1, 2, 1)
-    plt.plot(epochs, history["train_loss"], label="Train Loss", marker="o")
-    plt.plot(epochs, history["val_loss"], label="Val Loss", marker="o")
+    plt.subplot(2, 2, 1)
+    plt.plot(epochs, history["train_loss"], label="Train Loss", marker="o", linewidth=2)
+    
+    # Check if val_loss exists (for backward compatibility)
+    if "val_loss" in history:
+        plt.plot(epochs, history["val_loss"], label="Val Loss", marker="o", linewidth=2)
+    elif "val_macro_f1" in history:
+        # If we don't have val_loss, just plot train loss
+        plt.plot(epochs, history["train_loss"], label="Train Loss", marker="o", linewidth=2, color='blue')
+    
     plt.xlabel("Epochs")
     plt.ylabel("Loss")
-    plt.title("Training & Validation Loss")
+    plt.title("Training Loss", fontweight='bold')
     plt.legend()
-    plt.grid()
+    plt.grid(alpha=0.3)
 
-    # Plot 2: Training and validation accuracy
-    plt.subplot(1, 2, 2)
-    plt.plot(epochs, history["train_acc"], label="Train Accuracy", marker="o")
-    plt.plot(epochs, history["val_acc"], label="Val Accuracy", marker="o")
+    # Plot 2: Training accuracy
+    plt.subplot(2, 2, 2)
+    plt.plot(epochs, history["train_acc"], label="Train Accuracy", marker="o", linewidth=2, color='green')
     plt.xlabel("Epochs")
     plt.ylabel("Accuracy")
-    plt.title("Training & Validation Accuracy")
+    plt.title("Training Accuracy", fontweight='bold')
     plt.legend()
-    plt.grid()
+    plt.grid(alpha=0.3)
 
-    # Save plots to file
-    accuracy_and_loss_plot_path = os.path.join(run_dir, "accuracy_and_loss_plot.png")
-    plt.savefig(accuracy_and_loss_plot_path)
+    # Plot 3: Validation F1 scores (NEW for imbalance handling)
+    plt.subplot(2, 2, 3)
+    if "val_macro_f1" in history:
+        plt.plot(epochs, history["val_macro_f1"], label="Val Macro F1", marker="o", linewidth=2, color='red')
+    if "val_weighted_f1" in history:
+        plt.plot(epochs, history["val_weighted_f1"], label="Val Weighted F1", marker="o", linewidth=2, color='orange')
+    plt.xlabel("Epochs")
+    plt.ylabel("F1 Score")
+    plt.title("Validation F1 Scores", fontweight='bold')
+    plt.legend()
+    plt.grid(alpha=0.3)
 
-    print(f"Saved Accuracy and Loss Plot: {accuracy_and_loss_plot_path}\n")
+    # Plot 4: Combined metrics overview
+    plt.subplot(2, 2, 4)
+    
+    # Normalize metrics to same scale for comparison
+    metrics_to_plot = []
+    labels = []
+    
+    if "train_acc" in history:
+        metrics_to_plot.append(history["train_acc"])
+        labels.append("Train Accuracy")
+    
+    if "val_macro_f1" in history:
+        metrics_to_plot.append(history["val_macro_f1"])
+        labels.append("Val Macro F1")
+    
+    if "val_weighted_f1" in history:
+        metrics_to_plot.append(history["val_weighted_f1"])
+        labels.append("Val Weighted F1")
+    
+    for i, metric in enumerate(metrics_to_plot):
+        plt.plot(epochs, metric, label=labels[i], marker="o", linewidth=2)
+    
+    plt.xlabel("Epochs")
+    plt.ylabel("Score")
+    plt.title("Metrics Overview", fontweight='bold')
+    plt.legend()
+    plt.grid(alpha=0.3)
+
+    plt.tight_layout()
+    
+    # Save plots
+    plot_path = os.path.join(run_dir, "training_metrics_plot.png")
+    plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+    plt.close()
+
+    print(f"📊 Saved Training Metrics Plot: {plot_path}")
