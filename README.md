@@ -241,8 +241,8 @@ Main dataset used for fine-tuning and training.
 #### Model Configuration
 Model and Tokenizer
 ```python
-TOKENIZER_NAME = "bert-base-uncased"
-MODEL_NAME = "bert-base-uncased"
+MODEL_NAME = "prajjwal1/bert-tiny"
+TOKENIZER_NAME = "prajjwal1/bert-tiny"
 ```
 
 Defines the Hugging Face pre-trained model and tokenizer.
@@ -253,11 +253,12 @@ Training Hyperparameters
 EPOCHS = 10
 N_CLASSES = 5
 DROPOUT = 0.3
-MAX_LEN = 128
+MAX_LEN = 64
 VAL_SIZE = 0.1
 TEST_SIZE = 0.1
-BATCH_SIZE = 16
+BATCH_SIZE = 64
 LEARNING_RATE = 1e-5
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 ```
 
 Parameter Summary:
