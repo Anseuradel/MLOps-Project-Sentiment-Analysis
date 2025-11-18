@@ -208,6 +208,8 @@ You’ll find three main tabs:
 
 - Prediction Logs — View historical predictions from SQLite
 
+![streamlit image 3](assets/images/MLOps-project-image-streamlit-3.png)
+
 ---
 ## System Overview & Usage
 
