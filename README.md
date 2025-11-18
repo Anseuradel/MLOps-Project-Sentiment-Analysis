@@ -4,6 +4,8 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C.svg?style=flat&logo=pytorch)](https://pytorch.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688.svg?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED.svg?style=flat&logo=docker)](https://www.docker.com/)
+[![Tests](https://img.shields.io/badge/Tests-16%2F20%20passing-brightgreen)](https://github.com/Anseuradel/MLOps-Project)
+[![Macro F1](https://img.shields.io/badge/Macro_F1-55.3%25-orange)](https://github.com/Anseuradel/MLOps-Project)
 
 A comprehensive MLOps pipeline for sentiment analysis that demonstrates production-grade machine learning from data collection to deployment and monitoring. A production-ready sentiment analysis system that demonstrates complete ML lifecycle management using real-world app review data.
 
@@ -25,6 +27,7 @@ A comprehensive MLOps pipeline for sentiment analysis that demonstrates producti
     - [FastAPI Inference](#FastAPI-inference)
     - [Docker & MLOps Pipeline](#Docker--MLOps-Pipeline)
 - [Technologies Used](#technologies-used)
+- [Results & Performance](#results--performance)
 - [Example workflow](#example-workflow)
 - [Future improvement](#future-improvement)
 - [References](#references) 
@@ -92,13 +95,15 @@ Source: [Amazon review dataset](https://amazon-reviews-2023.github.io/)
 
 ### Challenge & Solution
 
-| Challenge                    | Implemented Solution                                               |
-| ---------------------------- | ------------------------------------------------------------------ |
-| Real-world data collection   | Switched to a public, ethical dataset (Amazon Reviews 2023)        |
-| Large-scale dataset handling | Implemented chunk-based data loading and weighted sampling         |
-| Model interpretability       | Included confusion matrices and confidence histograms              |
-| Deployment                   | Containerized FastAPI + Streamlit with Docker Compose              |
-| Monitoring                   | SQLite database for prediction logging and Streamlit visualization |
+| Challenge                        | Implemented Solution                                                   |
+| -------------------------------  | ---------------------------------------------------------------------- |
+| **Real-world data collection**   | **Switched to a public, ethical dataset (Amazon Reviews 2023)**        |
+| **Large-scale dataset handling** | **Implemented chunk-based data loading and weighted sampling**         |
+| **Model interpretability**       | **Included confusion matrices and confidence histograms**              |
+| **Deployment**                   | **Containerized FastAPI + Streamlit with Docker Compose**              |
+| **Monitoring**                   | **SQLite database for prediction logging and Streamlit visualization** |
+| **Severe class imbalance**       | **Class weights + Focal Loss + Macro F1 evaluation**                   |
+| **Testing & Reliability**        | **Comprehensive test suite (16/20 tests passing)**                     |
 
 ---
 
@@ -107,7 +112,15 @@ Source: [Amazon review dataset](https://amazon-reviews-2023.github.io/)
 ```Python
 Dataset/
     └── text.txt
+assets/
+└── images/
+db/
+└── predictions.db
 outputs/
+    ├── eda/
+        ├── class_distribution.png
+        ├── eda_report.txt
+        └── text_analysis.png
     └── training_evaluation/
         ├── evaluation/
             └── run_28-09-2025-16-16-25/
@@ -120,10 +133,11 @@ outputs/
                 ├── accuracy_and_loss_plot.png
                 └── training_history.json
 src/
+    ├── EDA/
+        ├── Data_analysis.py
     ├── api/
         ├── api.py
         ├── database.py
-        └── main.py
     ├── app/
         └── streamlit_app.py
     ├── model/
@@ -132,25 +146,24 @@ src/
         ├── data_processing.py
         ├── dataloader.py
         ├── evaluate.py
-        ├── inference.py
-        ├── main_loading_by_chunks.py
-        ├── main2.py
+        ├── main.py
         ├── model.py
         ├── run_main_colab_git_lfs.py
         ├── run_main_colab_hugg.py
         └── trainer.py
-    └── __init__.py
 tests/
-    ├── load_test.ps1
-    ├── test_api.py
-    └── test_model.py
+    ├── test_data_extraction.py
+    ├── test_data_processing.py
+    ├── test_dataloader.py
+    ├── test_model.py
+    ├── test_trainer.py
+    ├── test_database.py
+    └── conftest.py
 .gitattributes
 .gitignore
 config.py
 docker-compose.yaml
 Dockerfile
-last_chunk.txt
-launch_k8s.ps1
 LICENSE
 README.md
 requirements.txt
