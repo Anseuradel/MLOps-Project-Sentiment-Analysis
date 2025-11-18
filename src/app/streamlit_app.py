@@ -83,7 +83,7 @@ if st.button("Reload Model"):
 # Helper functions
 # -----------------------------
 def get_latest_output_folder(base_path="/app/outputs/training_evaluation/evaluation"):
-     """
+    """
     Find the most recent evaluation output folder.
     
     Args:
