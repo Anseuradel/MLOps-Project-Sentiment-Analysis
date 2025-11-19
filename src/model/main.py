@@ -161,7 +161,7 @@ def main():
     #     model, train_data, val_data, device=config.DEVICE, epochs=config.EPOCHS
     # )
 
-    # NEW: Train with imbalance handling
+    # Train with imbalance handling
     print("Training model with imbalance handling...\n")
     trained_model = train_model_with_imbalance_handling(
         model=model,
@@ -169,10 +169,11 @@ def main():
         val_loader=val_data_loader,
         device=config.DEVICE,
         df_train=train_data_raw,  # Pass training data for class weight calculation
-        epochs=config.EPOCHS,
+        epochs=config.EPOCHS,     # Set higher max, but will stop early
         lr=config.LEARNING_RATE,  # Make sure this is in your config
         use_focal_loss=True,      # Enable focal loss
         use_class_weights=True    # Enable class weights
+        patience=3                # Stop if no improvement for 3 epochs
     )
 
     
