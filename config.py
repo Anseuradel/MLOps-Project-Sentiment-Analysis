@@ -23,13 +23,10 @@ LABEL_MAPPING = {
 
 # --------------------------------------------------------------------------
 # Model config
-# TOKENIZER_NAME = "bert-base-uncased"
-# MODEL_NAME = "bert-base-uncased"
-
 MODEL_NAME = "prajjwal1/bert-tiny"
 TOKENIZER_NAME = "prajjwal1/bert-tiny"
 
-EPOCHS = 10
+EPOCHS = 15
 N_CLASSES = 5
 DROPOUT = 0.3
 MAX_LEN = 64
