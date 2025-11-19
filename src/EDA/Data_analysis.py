@@ -17,18 +17,38 @@ sns.set_style("whitegrid")
 
 
 def load_real_data():
-    df = load_data(config.DATASET_PATH_BALANCED)
-
+    """Load and prepare data with consistent column names."""
+    df = load_data(config.DATASET_PATH)
+    
+    print(f"📋 Original columns: {list(df.columns)}")
+    
+    # Handle different column name scenarios
     if "label_id" in df.columns and "label" not in df.columns:
-        df = df.rename(columns={"label_id": "label"})
+        # Keep label_id as the standard name
+        print("✅ Using 'label_id' as label column")
+    elif "label" in df.columns and "label_id" not in df.columns:
+        # Rename label to label_id for consistency
+        df = df.rename(columns={"label": "label_id"})
+        print("✅ Renamed 'label' to 'label_id'")
+    else:
+        # Check if we have rating column to create labels
+        if "rating" in df.columns:
+            print("🎯 Creating label_id from rating column")
+            # Map ratings to labels (1-5 → 0-4)
+            df["label_id"] = df["rating"].apply(lambda x: int(x) - 1)
+        else:
+            raise KeyError("No label column found. Expected 'label_id', 'label', or 'rating'")
     
     return df
-
 
 
 def plot_class_distribution(df, output_dir='outputs/eda'):
     """Plot beautiful class distribution charts."""
     os.makedirs(output_dir, exist_ok=True)
+    
+    # Check if label_id exists
+    if 'label_id' not in df.columns:
+        raise KeyError("'label_id' column not found in DataFrame")
     
     class_counts = df['label_id'].value_counts().sort_index()
     sentiment_names = ['Very Negative', 'Negative', 'Neutral', 'Positive', 'Very Positive']
@@ -73,8 +93,13 @@ def plot_class_distribution(df, output_dir='outputs/eda'):
     
     print(f"✅ Class distribution plot saved: {output_dir}/class_distribution.png")
 
+
 def plot_text_analysis(df, output_dir='outputs/eda'):
     """Plot comprehensive text analysis."""
+    # Check required columns
+    if 'label_id' not in df.columns or 'text' not in df.columns:
+        raise KeyError("Required columns 'label_id' or 'text' not found in DataFrame")
+    
     # Calculate text statistics
     df['text_length'] = df['text'].str.len()
     df['word_count'] = df['text'].str.split().str.len()
@@ -146,8 +171,13 @@ def plot_text_analysis(df, output_dir='outputs/eda'):
     
     print(f"✅ Text analysis plot saved: {output_dir}/text_analysis.png")
 
+
 def generate_analysis_report(df, output_dir='outputs/eda'):
     """Generate comprehensive analysis report."""
+    # Check required columns
+    if 'label_id' not in df.columns or 'text' not in df.columns:
+        raise KeyError("Required columns 'label_id' or 'text' not found in DataFrame")
+    
     # Basic statistics
     total_samples = len(df)
     num_classes = df['label_id'].nunique()
@@ -160,7 +190,7 @@ def generate_analysis_report(df, output_dir='outputs/eda'):
     # Calculate imbalance ratio
     max_count = class_distribution.max()
     min_count = class_distribution.min()
-    imbalance_ratio = max_count / min_count
+    imbalance_ratio = max_count / min_count if min_count > 0 else float('inf')
     
     report = f"""
 EXPLORATORY DATA ANALYSIS REPORT
@@ -178,7 +208,8 @@ CLASS DISTRIBUTION ANALYSIS:
     sentiment_names = ['Very Negative', 'Negative', 'Neutral', 'Positive', 'Very Positive']
     for label, count in class_distribution.items():
         percentage = (count / total_samples) * 100
-        report += f"- {sentiment_names[label]}: {count} samples ({percentage:.1f}%)\n"
+        sentiment_name = sentiment_names[label] if label < len(sentiment_names) else f'Class {label}'
+        report += f"- {sentiment_name}: {count} samples ({percentage:.1f}%)\n"
     
     report += f"""
 IMBALANCE ANALYSIS:
@@ -230,17 +261,24 @@ RECOMMENDATIONS:
     print(f"🔤 Avg word count: {word_counts.mean():.1f} words")
     print("="*50)
 
+
 def analyze_imbalance_solutions(df, label_column='label_id'):
     """Analyze and recommend imbalance solutions."""
+    # Check if label column exists
+    if label_column not in df.columns:
+        raise KeyError(f"Label column '{label_column}' not found in DataFrame")
+    
     class_counts = df[label_column].value_counts().sort_index()
     total_samples = len(df)
     
     print("🔍 CLASS IMBALANCE ANALYSIS")
     print("=" * 40)
     
+    sentiment_names = ['Very Negative', 'Negative', 'Neutral', 'Positive', 'Very Positive']
     for class_id, count in class_counts.items():
         percentage = (count / total_samples) * 100
-        print(f"Class {class_id}: {count:>6} samples ({percentage:5.1f}%)")
+        sentiment_name = sentiment_names[class_id] if class_id < len(sentiment_names) else f'Class {class_id}'
+        print(f"{sentiment_name:>15}: {count:>6} samples ({percentage:5.1f}%)")
     
     imbalance_ratio = class_counts.max() / class_counts.min()
     print(f"\n⚖️  Imbalance Ratio: {imbalance_ratio:.1f}")
@@ -249,27 +287,29 @@ def analyze_imbalance_solutions(df, label_column='label_id'):
     print("\n🎯 RECOMMENDED SOLUTIONS:")
     
     if imbalance_ratio > 10:
-        print("✅ HIGH IMBALANCE (>10:1)")
-        print("   - Use SMOTE + Class Weights + Focal Loss")
-        print("   - Consider ensemble methods")
+        print("   🔴 HIGH IMBALANCE (>10:1)")
+        print("   - Use Class Weights + Focal Loss")
+        print("   - Consider data resampling")
         print("   - Use macro F1 for evaluation")
+        print("   - Monitor per-class performance closely")
     
     elif imbalance_ratio > 5:
-        print("✅ MODERATE IMBALANCE (5-10:1)")
-        print("   - Use Class Weights + Focal Loss") 
-        print("   - Try random oversampling")
+        print("   🟡 MODERATE IMBALANCE (5-10:1)")
+        print("   - Use Class Weights in loss function") 
+        print("   - Try Focal Loss with gamma=2")
         print("   - Monitor per-class performance")
     
     elif imbalance_ratio > 2:
-        print("✅ MILD IMBALANCE (2-5:1)")
-        print("   - Use Class Weights in loss function")
+        print("   🟢 MILD IMBALANCE (2-5:1)")
+        print("   - Use Class Weights")
         print("   - Consider focal loss with gamma=1")
     
     else:
-        print("✅ RELATIVELY BALANCED")
+        print("   ✅ RELATIVELY BALANCED")
         print("   - Standard training should work")
     
     return imbalance_ratio
+
 
 def main():
     """Run complete EDA analysis."""
@@ -280,25 +320,39 @@ def main():
     output_dir = 'outputs/eda'
     os.makedirs(output_dir, exist_ok=True)
     
-    # Load data
-    df = load_real_data()
-    print(f"📊 Loaded dataset with {len(df)} samples")
-    print(f"📋 Columns: {list(df.columns)}")
-    print(f"🎯 Classes: {df['label_id'].nunique()}")
-    
-    # Generate all analyses
-    print("\n📈 Generating visualizations...")
-    plot_class_distribution(df, output_dir)
-    plot_text_analysis(df, output_dir)
-    generate_analysis_report(df, output_dir)
-    analyze_imbalance_solutions(df, output_dir)
-    
-    print("\n✅ EDA Analysis Complete!")
-    print(f"📁 All outputs saved to: {output_dir}/")
-    print("\nGenerated files:")
-    for file in os.listdir(output_dir):
-        if file.endswith(('.png', '.txt')):
-            print(f"  - {output_dir}/{file}")
+    try:
+        # Load data
+        df = load_real_data()
+        print(f"📊 Loaded dataset with {len(df)} samples")
+        print(f"📋 Columns: {list(df.columns)}")
+        
+        # Check if label_id exists after loading
+        if 'label_id' not in df.columns:
+            print("❌ 'label_id' column not found after data loading")
+            print("   Available columns:", list(df.columns))
+            return
+        
+        print(f"🎯 Classes: {df['label_id'].nunique()}")
+        
+        # Generate all analyses
+        print("\n📈 Generating visualizations...")
+        plot_class_distribution(df, output_dir)
+        plot_text_analysis(df, output_dir)
+        generate_analysis_report(df, output_dir)
+        analyze_imbalance_solutions(df)
+        
+        print("\n✅ EDA Analysis Complete!")
+        print(f"📁 All outputs saved to: {output_dir}/")
+        print("\nGenerated files:")
+        for file in os.listdir(output_dir):
+            if file.endswith(('.png', '.txt')):
+                print(f"  - {output_dir}/{file}")
+                
+    except Exception as e:
+        print(f"❌ Error during EDA analysis: {e}")
+        import traceback
+        traceback.print_exc()
+
 
 if __name__ == "__main__":
     main()

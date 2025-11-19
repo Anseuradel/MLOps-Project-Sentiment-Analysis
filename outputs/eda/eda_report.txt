@@ -3,39 +3,40 @@ EXPLORATORY DATA ANALYSIS REPORT
 ==================================================
 
 DATASET OVERVIEW:
-- Total samples: 26,180
+- Total samples: 64,094
 - Number of classes: 5
-- Columns: text, label_id, label, text_length, word_count
-- Data types: {'text': dtype('O'), 'label_id': dtype('int64'), 'label': dtype('O'), 'text_length': dtype('int64'), 'word_count': dtype('int64')}
+- Columns: text, label_id, label_text, text_length, word_count
+- Data types: {'text': dtype('O'), 'label_id': dtype('int64'), 'label_text': dtype('O'), 'text_length': dtype('int64'), 'word_count': dtype('int64')}
 
 CLASS DISTRIBUTION ANALYSIS:
-- Very Negative: 5236 samples (20.0%)
-- Negative: 5236 samples (20.0%)
-- Neutral: 5236 samples (20.0%)
-- Positive: 5236 samples (20.0%)
-- Very Positive: 5236 samples (20.0%)
+- Very Negative: 7264 samples (11.3%)
+- Negative: 1018 samples (1.6%)
+- Neutral: 1536 samples (2.4%)
+- Positive: 2927 samples (4.6%)
+- Very Positive: 51349 samples (80.1%)
 
 IMBALANCE ANALYSIS:
-- Imbalance ratio (max/min): 1.00
-- Majority class: Very Negative
-- Minority class: Very Negative
-- Dataset is well balanced
+- Imbalance ratio (max/min): 50.44
+- Majority class: Very Positive
+- Minority class: Negative
+- Dataset is highly imbalanced
 
 TEXT STATISTICS:
-- Average text length: 180.3 characters
-- Average word count: 34.3 words
+- Average text length: 104.9 characters
+- Average word count: 19.6 words
 - Shortest text: 4 characters
-- Longest text: 2545 characters
-- Standard deviation: 185.5 characters
+- Longest text: 3752 characters
+- Standard deviation: 138.3 characters
 
 DATA QUALITY ASSESSMENT:
 - Missing values: 0
-- Duplicate texts: 993
+- Duplicate texts: 6665
 - Empty texts: 0
-- Unique texts: 25187
+- Unique texts: 57429
 
 RECOMMENDATIONS:
-- Dataset is reasonably balanced for training
-- Standard training approach should work well
+- Consider using class weights in training
+- Try oversampling minority classes
+- Use stratified sampling for splits
 - Some texts are very long, consider truncation for BERT
 - Monitor model performance across all classes during training
