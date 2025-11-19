@@ -389,7 +389,24 @@ focal_loss = FocalLoss(alpha=class_weights, gamma=2.0)
     - confidence_histogram.png
 
     - accuracy_and_loss_plot.png
+ 
+#### Training Progress
 
+![Training Metrics](assets/images/training_metrics_plot.png)
+
+*Training loss, accuracy, and F1 scores over epochs showing stable convergence*  
+
+#### Class Imbalance Handling
+
+![Class Distribution](assets/images/class_distribution.png)
+
+*Dataset analysis revealing 80% "very positive" class imbalance - the core challenge addressed*
+
+#### Text Characteristics
+
+![Text Analysis](assets/images/text_analysis.png)
+
+*Distribution of text lengths and word counts across different sentiment classes*
 
 ### FastAPI inference
 
@@ -482,6 +499,24 @@ docker compose up --build
 - **Train Loss**: 0.415 (decreased 68% from 1.294)
 - **Macro F1 Score**: 55.3% **(Key metric for imbalance)**
 - **Weighted F1 Score**: 83.4%
+
+### Performance on Test Set
+
+![Confusion Matrix](assets/images/confusion_matrix.png)
+
+*Confusion matrix showing model performance across all 5 sentiment classes*
+
+### Detailed Metrics
+
+![Classification Report](assets/images/classification_report.png)
+
+*Precision, recall, and F1 scores for each sentiment class*
+
+### Prediction Confidence
+
+![Confidence Histogram](assets/images/confidence_histogram.png)
+
+*Distribution of prediction confidence scores showing well-calibrated model*
 
 ### Performance Analysis
 
