@@ -172,7 +172,7 @@ def main():
         epochs=config.EPOCHS,     # Set higher max, but will stop early
         lr=config.LEARNING_RATE,  # Make sure this is in your config
         use_focal_loss=True,      # Enable focal loss
-        use_class_weights=True    # Enable class weights
+        use_class_weights=True,    # Enable class weights
         patience=3                # Stop if no improvement for 3 epochs
     )
 
