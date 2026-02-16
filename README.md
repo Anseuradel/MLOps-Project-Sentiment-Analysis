@@ -472,7 +472,7 @@ docker compose up --build
 
 - Monitoring — every prediction stored and retrievable for analysis.
 
-- Extensibility — ready for CI/CD and Kubernetes integration.
+- Portability — ready for CI/CD with Docker Compose across environments.
 
 ---
 ## Technologies Used
